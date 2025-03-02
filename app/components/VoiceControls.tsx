@@ -16,7 +16,7 @@ interface MicrophoneButtonProps {
 }
 
 export function MicrophoneButton({ onTranscript, disabled = false }: MicrophoneButtonProps) {
-  const { locale, t } = useLanguage();
+  const { language, t } = useLanguage();
   const [isListening, setIsListening] = useState(false);
   const [supported, setSupported] = useState(false);
   
@@ -36,7 +36,7 @@ export function MicrophoneButton({ onTranscript, disabled = false }: MicrophoneB
     setIsListening(true);
     
     const speechRecognition = initSpeechRecognition(
-      locale,
+      language,
       (result) => {
         if (result.isFinal) {
           onTranscript(result.transcript);
@@ -55,7 +55,7 @@ export function MicrophoneButton({ onTranscript, disabled = false }: MicrophoneB
         setIsListening(false);
       }
     }, 10000);
-  }, [locale, onTranscript, isListening, supported, disabled]);
+  }, [language, onTranscript, isListening, supported, disabled]);
   
   if (!supported) return null;
   
@@ -86,7 +86,7 @@ interface SpeakButtonProps {
 }
 
 export function SpeakButton({ text, disabled = false }: SpeakButtonProps) {
-  const { locale, t } = useLanguage();
+  const { language, t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
   const [supported, setSupported] = useState(false);
   
@@ -106,12 +106,12 @@ export function SpeakButton({ text, disabled = false }: SpeakButtonProps) {
     
     setIsPlaying(true);
     
-    const speech = speakText(text, locale);
+    const speech = speakText(text, language);
     speech.start();
     speech.onEnd(() => {
       setIsPlaying(false);
     });
-  }, [locale, text, isPlaying, supported, disabled]);
+  }, [language, text, isPlaying, supported, disabled]);
   
   if (!supported || !text) return null;
   

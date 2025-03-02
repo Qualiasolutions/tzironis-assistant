@@ -6,7 +6,7 @@ const client = new MistralClient(process.env.MISTRAL_API_KEY || "");
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, locale = "en" } = await req.json();
+    const { messages, language = "en" } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }));
 
     // Add system message with context about Tzironis and language preference
-    const systemPrompt = locale === "el" 
+    const systemPrompt = language === "el" 
       ? `Είσαι η Qualia, ένας βοηθός AI για την Tzironis (tzironis.gr).
         Βοηθάς με τη γνώση του ιστότοπου, τον αυτοματισμό τιμολογίων και τη δημιουργία επιχειρηματικών οδηγών.
         Να είσαι πάντα επαγγελματικός, περιεκτικός και εξυπηρετικός.

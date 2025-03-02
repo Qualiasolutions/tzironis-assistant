@@ -20,7 +20,7 @@ export const isSpeechSynthesisSupported = (): boolean => {
 
 // Initialize speech recognition
 export const initSpeechRecognition = (
-  locale: LocaleType,
+  language: LocaleType,
   onResult: (result: SpeechRecognitionResult) => void,
   onEnd: () => void
 ): {
@@ -42,7 +42,7 @@ export const initSpeechRecognition = (
   // Configure speech recognition
   recognition.continuous = false;
   recognition.interimResults = true;
-  recognition.lang = locale === 'el' ? 'el-GR' : 'en-US';
+  recognition.lang = language === 'el' ? 'el-GR' : 'en-US';
   
   recognition.onresult = (event: any) => {
     const transcript = Array.from(event.results)
@@ -63,7 +63,7 @@ export const initSpeechRecognition = (
 };
 
 // Speak text using speech synthesis
-export const speakText = (text: string, locale: LocaleType): {
+export const speakText = (text: string, language: LocaleType): {
   start: () => void;
   stop: () => void;
   onEnd: (callback: () => void) => void;
@@ -81,11 +81,11 @@ export const speakText = (text: string, locale: LocaleType): {
   const utterance = new SpeechSynthesisUtterance(text);
   
   // Set language
-  utterance.lang = locale === 'el' ? 'el-GR' : 'en-US';
+  utterance.lang = language === 'el' ? 'el-GR' : 'en-US';
   
   // Try to find appropriate voice
   let voices = synthesis.getVoices();
-  const langCode = locale === 'el' ? 'el' : 'en';
+  const langCode = language === 'el' ? 'el' : 'en';
   
   // Find a matching voice or use default
   const voice = voices.find((v) => v.lang.includes(langCode)) || voices[0];

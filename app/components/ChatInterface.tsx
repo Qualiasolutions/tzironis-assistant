@@ -15,7 +15,7 @@ type Message = {
 };
 
 export default function ChatInterface() {
-  const { t, locale } = useLanguage();
+  const { t, language } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -38,7 +38,7 @@ export default function ChatInterface() {
         timestamp: new Date(),
       },
     ]);
-  }, [locale, t]);
+  }, [language, t]);
 
   useEffect(() => {
     scrollToBottom();
@@ -107,7 +107,7 @@ export default function ChatInterface() {
         // Call the API
         const response = await axios.post("/api/chat", {
           messages: apiMessages,
-          locale, // Pass current locale to the API
+          language, // Pass current language to the API
         });
 
         // Add assistant response
