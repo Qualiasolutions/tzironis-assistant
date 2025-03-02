@@ -93,4 +93,3 @@ export default function VoiceControls({ onTextInput, disabled = false, className
     </button>
   );
 } 
-} 
