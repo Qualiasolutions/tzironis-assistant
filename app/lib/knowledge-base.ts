@@ -1,5 +1,5 @@
 import { Pinecone } from "@pinecone-database/pinecone";
-import { Document } from "langchain/document";
+import { Document } from "@langchain/core/documents";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { PineconeStore } from "@langchain/pinecone";
 import * as cheerio from "cheerio";
@@ -39,7 +39,7 @@ export class KnowledgeBase {
     this.pineconeClient = new Pinecone({
       apiKey: pineconeApiKey,
     });
-    this.embeddings = new OpenAIEmbeddings({ openAIApiKey: openaiApiKey });
+    this.embeddings = new OpenAIEmbeddings({ apiKey: openaiApiKey });
     this.namespace = namespace;
     this.index = pineconeIndex;
     this.maxPages = maxPages;
