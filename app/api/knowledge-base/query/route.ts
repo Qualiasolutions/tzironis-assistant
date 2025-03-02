@@ -15,13 +15,12 @@ export async function POST(req: NextRequest) {
 
     // Get environment variables
     const pineconeApiKey = process.env.PINECONE_API_KEY;
-    const pineconeEnvironment = process.env.PINECONE_ENVIRONMENT;
     const pineconeIndex = process.env.PINECONE_INDEX;
     const openAIApiKey = process.env.OPENAI_API_KEY;
     const mistralApiKey = process.env.MISTRAL_API_KEY;
 
     // Validate environment variables
-    if (!pineconeApiKey || !pineconeEnvironment || !pineconeIndex || !openAIApiKey || !mistralApiKey) {
+    if (!pineconeApiKey || !pineconeIndex || !openAIApiKey || !mistralApiKey) {
       return NextResponse.json(
         { error: "Missing required environment variables" },
         { status: 500 }
@@ -31,7 +30,6 @@ export async function POST(req: NextRequest) {
     // Initialize knowledge base
     const knowledgeBase = new KnowledgeBase({
       pineconeApiKey,
-      pineconeEnvironment,
       pineconeIndex,
       namespace: 'tzironis-kb',
       openaiApiKey: openAIApiKey,

@@ -87,7 +87,7 @@ export default function ChatInterface() {
         const redirectMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: "I'll take you to the Tzironis website right away!",
+          content: t("redirectToTzironis"),
           timestamp: new Date(),
         };
         
@@ -125,7 +125,7 @@ export default function ChatInterface() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "I'm sorry, I encountered an error processing your request. Please try again later.",
+        content: t("chatError"),
         timestamp: new Date(),
       };
       

@@ -6,6 +6,16 @@ export const translations = {
     navInvoiceAutomation: "Invoice Automation",
     navLeadGeneration: "Lead Generation",
     
+    // Chat
+    chatWelcome: "Hello! I'm Qualia, your business assistant for Tzironis. How can I help you today?",
+    chatPlaceholder: "Type your message here...",
+    microphoneOn: "Listening... Click to stop",
+    microphoneOff: "Click to speak",
+    playResponse: "Play",
+    stopPlayback: "Stop",
+    redirectToTzironis: "I'll take you to the Tzironis website right away!",
+    chatError: "I'm sorry, I encountered an error processing your request. Please try again later.",
+    
     // Home Page
     homeTitle: "QUALIA Assistant",
     homeSubtitle: "Intelligent business assistant for Tzironis, powered by Mistral AI",
@@ -90,6 +100,16 @@ export const translations = {
     navKnowledgeBase: "Βάση Γνώσεων",
     navInvoiceAutomation: "Αυτοματισμός Τιμολογίων",
     navLeadGeneration: "Δημιουργία Πελατών",
+    
+    // Chat
+    chatWelcome: "Γειά! Είμαι ο QUALIA, ο επιχειρηματικός βοηθός σας για την Tzironis. Πώς μπορώ να σας βοηθήσω σήμερα?",
+    chatPlaceholder: "Πληκτρολογήστε το μήνυμά σας εδώ...",
+    microphoneOn: "Ακούω... Κάντε κλικ για να σταματήσετε",
+    microphoneOff: "Κάντε κλικ για να μιλήσετε",
+    playResponse: "Αναπαραγωγή",
+    stopPlayback: "Σταμάτησε",
+    redirectToTzironis: "Θα σας πάρω στον ιστότοπο Tzironis αμέσως!",
+    chatError: "Λυπούμαι, αντιμετώπισα ένα πρόβλημα επεξεργάζοντας την αίτησή σας. Παρακαλώ προσπαθήστε αργότερα.",
     
     // Home Page
     homeTitle: "QUALIA Βοηθός",

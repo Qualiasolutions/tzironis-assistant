@@ -7,10 +7,11 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../lib/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import AuthButton from './AuthButton';
+import { translations } from '../lib/translations';
 
 interface NavItem {
   href: string;
-  labelKey: string;
+  labelKey: keyof typeof translations.en;
 }
 
 const navItems: NavItem[] = [
@@ -60,7 +61,7 @@ export default function NavBar() {
                   : 'text-gray-600 hover:text-primary'
               }`}
             >
-              {t(item.labelKey)}
+              {t(item.labelKey as any)}
             </Link>
           ))}
           <Link
@@ -107,7 +108,7 @@ export default function NavBar() {
                 }`}
                 onClick={closeMenu}
               >
-                {t(item.labelKey)}
+                {t(item.labelKey as any)}
               </Link>
             ))}
             <Link

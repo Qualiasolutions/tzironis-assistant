@@ -23,7 +23,6 @@ export class KnowledgeBase {
 
   constructor({
     pineconeApiKey,
-    pineconeEnvironment,
     pineconeIndex,
     openaiApiKey,
     namespace = "tzironis-kb",
@@ -31,7 +30,6 @@ export class KnowledgeBase {
     maxDepth = 3,
   }: {
     pineconeApiKey: string;
-    pineconeEnvironment: string;
     pineconeIndex: string;
     openaiApiKey: string;
     namespace?: string;
@@ -40,7 +38,6 @@ export class KnowledgeBase {
   }) {
     this.pineconeClient = new Pinecone({
       apiKey: pineconeApiKey,
-      environment: pineconeEnvironment,
     });
     this.embeddings = new OpenAIEmbeddings({ openAIApiKey: openaiApiKey });
     this.namespace = namespace;
@@ -92,7 +89,7 @@ export class KnowledgeBase {
 
     try {
       // Launch headless browser
-      const browser = await puppeteer.launch({ headless: "new" });
+      const browser = await puppeteer.launch({ headless: true });
       const page = await browser.newPage();
       
       // Set timeout to prevent hanging on slow pages
