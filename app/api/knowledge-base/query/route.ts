@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
       pineconeApiKey,
       pineconeEnvironment,
       pineconeIndex,
-      pineconeNamespace: 'tzironis-kb',
-      openAIApiKey,
+      namespace: 'tzironis-kb',
+      openaiApiKey: openAIApiKey,
     });
 
     // Search the knowledge base

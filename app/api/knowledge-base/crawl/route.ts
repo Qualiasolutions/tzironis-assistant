@@ -40,12 +40,10 @@ export async function POST(req: NextRequest) {
       pineconeApiKey,
       pineconeEnvironment,
       pineconeIndex,
-      pineconeNamespace: 'tzironis-kb',
-      openAIApiKey,
-      crawlOptions: {
-        maxPages: maxPages || 50,
-        maxDepth: maxDepth || 3,
-      },
+      namespace: 'tzironis-kb',
+      openaiApiKey: openAIApiKey,
+      maxPages: maxPages || 50,
+      maxDepth: maxDepth || 3,
     });
 
     // Start the crawling process
@@ -53,8 +51,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       message: "Crawling completed successfully",
-      pagesProcessed: result.pages,
-      chunksStored: result.chunks,
+      pagesProcessed: result.pagesProcessed,
+      chunksStored: result.chunksStored,
     });
   } catch (error: any) {
     console.error("Error in crawl API:", error);
