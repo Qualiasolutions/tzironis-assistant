@@ -104,7 +104,7 @@ export default function ChatInterface() {
           <div className="flex justify-center py-4">
             <div className="animate-pulse flex space-x-2 items-center">
               <Bot className="h-5 w-5 text-primary" />
-              <span className="text-sm text-slate-500 dark:text-slate-400">{t("typing")}</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{t("loading")}</span>
             </div>
           </div>
         )}
@@ -135,7 +135,7 @@ export default function ChatInterface() {
             onClick={handleSendMessage}
             disabled={inputValue.trim() === "" || isLoading}
             className="absolute right-3 p-2 rounded-full text-white bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            aria-label={t("send")}
+            aria-label={t("sendMessage")}
           >
             <Send className="h-4 w-4" />
           </button>
