@@ -196,21 +196,29 @@ export async function POST(req: NextRequest) {
       };
       
       // Calculate totals if not provided
-      if (!newInvoice.total) {
+      if (newInvoice && !newInvoice.total) {
         newInvoice.total = newInvoice.items.reduce((sum, item) => sum + item.total, 0);
       }
       
-      if (!newInvoice.tax) {
+      if (newInvoice && !newInvoice.tax) {
         newInvoice.tax = newInvoice.total * 0.24; // 24% VAT in Greece
       }
       
-      if (!newInvoice.grandTotal) {
+      if (newInvoice && !newInvoice.grandTotal) {
         newInvoice.grandTotal = newInvoice.total + newInvoice.tax;
       }
     } else {
       return NextResponse.json(
-        { error: "Either command or invoice data is required" },
+        { error: "Either command or invoice data must be provided" },
         { status: 400 }
+      );
+    }
+    
+    // Ensure newInvoice is not null before proceeding
+    if (!newInvoice) {
+      return NextResponse.json(
+        { error: "Failed to create invoice" },
+        { status: 500 }
       );
     }
     
