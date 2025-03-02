@@ -6,8 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Github, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/app/lib/LanguageContext";
+import { Suspense } from "react";
 
-export default function SignInPage() {
+// Create a client component that uses the search params
+function SignInContent() {
   const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -170,5 +172,14 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that uses Suspense
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 } 

@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { useLanguage } from "@/app/lib/LanguageContext";
+import { Suspense } from "react";
 
-export default function AuthErrorPage() {
+// Create a client component that uses the search params
+function AuthErrorContent() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
@@ -63,5 +65,14 @@ export default function AuthErrorPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that uses Suspense
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <AuthErrorContent />
+    </Suspense>
   );
 } 
