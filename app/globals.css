@@ -24,41 +24,106 @@
   /* UI component colors */
   --muted: #f8fafc;
   --muted-foreground: #64748b;
-  --secondary: #f7f9ff;
+  --secondary: #f1f5f9;
   --secondary-foreground: #1e293b;
   
   /* Typography */
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark mode colors */
-    --primary: #6366f1;
-    --primary-hover: #818cf8;
-    --accent: #8b5cf6;
-    --accent-hover: #a78bfa;
-    
-    /* Neutral colors */
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    --card: #1e293b;
-    --card-foreground: #f1f5f9;
-    --border: #334155;
-    --ring: rgba(99, 102, 241, 0.3);
-    
-    /* UI component colors */
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
-    --secondary: #1e293b;
-    --secondary-foreground: #e2e8f0;
-  }
+.dark {
+  /* Dark mode colors */
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --accent: #8b5cf6;
+  --accent-hover: #a78bfa;
+  
+  /* Neutral colors */
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --border: #334155;
+  --ring: rgba(99, 102, 241, 0.3);
+  
+  /* UI component colors */
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
 }
 
 body {
   font-family: var(--font-sans);
   color: var(--foreground);
   background-color: var(--background);
+  min-height: 100vh;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  @apply inline-flex items-center px-4 py-2 bg-primary text-white rounded-md text-sm font-medium shadow-sm hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center px-4 py-2 bg-secondary text-secondary-foreground rounded-md text-sm font-medium shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors;
+}
+
+/* Animation classes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadein {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+}
+
+/* Apply dark mode based on class rather than media query */
+.dark body {
+  color-scheme: dark;
 }
 
 @layer base {
@@ -128,51 +193,4 @@ body {
   .nav-link.active::after {
     @apply content-[''] absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full;
   }
-}
-
-/* Modern animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fadein {
-  animation: fadeIn 0.5s ease forwards;
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.4s ease forwards;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Scroll styling */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 20px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(107, 114, 128, 0.7);
 }

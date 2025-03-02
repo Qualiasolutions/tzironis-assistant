@@ -1,81 +1,96 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mic, MicOff } from "lucide-react";
+import { Mic, MicOff, StopCircle } from "lucide-react";
 import { useLanguage } from "@/app/lib/LanguageContext";
-import { initSpeechRecognition } from "@/app/lib/speech";
 
 interface VoiceControlsProps {
   onTextInput: (text: string) => void;
+  disabled?: boolean;
+  className?: string;
 }
 
-export default function VoiceControls({ onTextInput }: VoiceControlsProps) {
+export default function VoiceControls({ onTextInput, disabled = false, className = "" }: VoiceControlsProps) {
   const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [recognitionInstance, setRecognitionInstance] = useState<{ start: () => void; stop: () => void } | null>(null);
-  const { t, language } = useLanguage();
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const { language } = useLanguage();
 
   useEffect(() => {
-    // Initialize speech recognition
-    try {
-      const instance = initSpeechRecognition(
-        language,
-        (result) => {
-          if (result.isFinal) {
-            setTranscript(result.transcript);
-            onTextInput(result.transcript);
-          }
-        },
-        () => {
-          setIsListening(false);
-        }
-      );
+    if (typeof window !== "undefined" && "SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.continuous = true;
+      recognitionInstance.interimResults = true;
+      recognitionInstance.lang = language === "en" ? "en-US" : "el-GR";
       
-      setRecognitionInstance(instance);
-    } catch (error) {
-      console.error("Speech recognition not supported", error);
+      recognitionInstance.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join("");
+          
+        if (event.results[0].isFinal) {
+          onTextInput(transcript);
+          stopListening();
+        }
+      };
+      
+      recognitionInstance.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+        stopListening();
+      };
+      
+      setRecognition(recognitionInstance);
     }
-
+    
     return () => {
-      if (recognitionInstance) {
-        recognitionInstance.stop();
+      if (recognition) {
+        recognition.stop();
       }
     };
-  }, [language, onTextInput]);
+  }, [language]);
 
   const toggleListening = () => {
+    if (disabled) return;
+    
     if (isListening) {
-      recognitionInstance?.stop();
-      setIsListening(false);
-    } else if (recognitionInstance) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
+
+  const startListening = () => {
+    if (recognition) {
       try {
-        recognitionInstance.start();
+        recognition.start();
         setIsListening(true);
-        setTranscript("");
       } catch (error) {
-        console.error("Failed to start speech recognition", error);
+        console.error("Failed to start speech recognition:", error);
       }
     }
   };
 
+  const stopListening = () => {
+    if (recognition) {
+      recognition.stop();
+      setIsListening(false);
+    }
+  };
+
+  if (!recognition) {
+    return null;
+  }
+
   return (
-    <div className="flex gap-2">
-      <button
-        onClick={toggleListening}
-        className={`flex items-center justify-center w-12 h-12 rounded-full transition-all ${
-          isListening
-            ? "bg-red-500 text-white hover:bg-red-600 animate-pulse"
-            : "bg-primary/10 text-primary hover:bg-primary/20"
-        } hover-card-effect`}
-        aria-label={isListening ? t("stopListening") : t("startListening")}
-        title={isListening ? t("stopListening") : t("startListening")}
-      >
-        {isListening ? (
-          <MicOff className="h-5 w-5" />
-        ) : (
-          <Mic className="h-5 w-5" />
-        )}
-      </button>
-    </div>
+    <button
+      onClick={toggleListening}
+      disabled={disabled}
+      className={`p-2 ${isListening ? 'text-red-500' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'} disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${className}`}
+      aria-label={isListening ? "Stop listening" : "Start voice input"}
+    >
+      {isListening ? <StopCircle className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+    </button>
   );
+} 
 } 

@@ -12,7 +12,7 @@ interface MessageBubbleProps {
   showAvatar?: boolean;
 }
 
-export default function MessageBubble({ message, showAvatar = false }: MessageBubbleProps) {
+export default function MessageBubble({ message, showAvatar = true }: MessageBubbleProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copied, setCopied] = useState(false);
   const { language } = useLanguage();
@@ -41,32 +41,34 @@ export default function MessageBubble({ message, showAvatar = false }: MessageBu
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div 
+      className={`flex ${isUser ? "justify-end" : "justify-start"} animate-fadein`}
+    >
       <div
-        className={`message-bubble flex ${
-          isUser
-            ? "flex-row-reverse"
-            : "flex-row"
-        } max-w-[90%] lg:max-w-[75%]`}
+        className={`flex items-start gap-3 ${
+          isUser ? "flex-row-reverse" : "flex-row"
+        } max-w-[85%]`}
       >
         {showAvatar && (
-          <div className={`flex-shrink-0 ${isUser ? "ml-3" : "mr-3"}`}>
-            <div className={`w-8 h-8 rounded-full ${isUser ? "bg-accent/20" : "bg-primary/20"} flex items-center justify-center`}>
+          <div className="flex-shrink-0 mt-1">
+            <div className={`w-8 h-8 rounded-full ${isUser ? "bg-accent/10" : "bg-primary/10"} flex items-center justify-center`}>
               {isUser ? (
-                <User className="h-5 w-5 text-accent" />
+                <User className="h-4 w-4 text-accent" />
               ) : (
-                <Bot className="h-5 w-5 text-primary" />
+                <Bot className="h-4 w-4 text-primary" />
               )}
             </div>
           </div>
         )}
 
         <div
-          className={`relative overflow-hidden ${
-            isUser
-              ? "user-message bg-accent text-white rounded-2xl rounded-tr-sm shadow-md"
-              : "assistant-message bg-white/80 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl rounded-tl-sm shadow-sm dark:text-white"
-          } px-4 py-3 hover-card-effect`}
+          className={`
+            ${isUser
+              ? "bg-accent text-white rounded-2xl rounded-tr-sm"
+              : "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-2xl rounded-tl-sm border border-slate-200 dark:border-slate-700"
+            } 
+            px-4 py-3 shadow-sm
+          `}
         >
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <ReactMarkdown>
@@ -78,7 +80,7 @@ export default function MessageBubble({ message, showAvatar = false }: MessageBu
             {!isUser && (
               <button
                 onClick={handleSpeak}
-                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
+                className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
                 aria-label={isSpeaking ? "Stop speaking" : "Speak message"}
               >
                 <Volume2 className="h-3.5 w-3.5" />
@@ -87,7 +89,7 @@ export default function MessageBubble({ message, showAvatar = false }: MessageBu
             
             <button
               onClick={copyToClipboard}
-              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
+              className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
               aria-label="Copy message"
             >
               {copied ? (
