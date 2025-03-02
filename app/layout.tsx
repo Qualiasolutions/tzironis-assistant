@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "./lib/LanguageContext";
@@ -16,6 +16,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
+};
+
 export const metadata: Metadata = {
   title: "Qualia AI | Intelligent Business Assistant for Tzironis",
   description: "AI-powered assistant for Tzironis offering website knowledge base, invoice automation, and business lead generation.",
@@ -24,10 +31,6 @@ export const metadata: Metadata = {
   creator: "Tzironis",
   publisher: "Tzironis",
   metadataBase: new URL("https://tzironis.gr"),
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
-  ],
 };
 
 export default function RootLayout({

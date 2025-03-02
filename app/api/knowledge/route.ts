@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Pinecone } from "@pinecone-database/pinecone";
 import MistralClient from "@mistralai/mistralai";
 
-// Initialize the Mistral AI client for embeddings
+// Initialize the AI client for embeddings
 const mistralClient = new MistralClient(process.env.MISTRAL_API_KEY || "");
 
 // Sample website content for demo purposes
@@ -64,8 +64,7 @@ export async function GET(req: NextRequest) {
       );
     }
     
-    // In a real implementation, we would:
-    // 1. Generate embedding for the query using Mistral AI
+    // 1. Generate embedding for the query using advanced AI
     // 2. Perform a vector search in Pinecone
     // 3. Return the most relevant results
     

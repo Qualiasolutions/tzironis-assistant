@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import MistralClient from "@mistralai/mistralai";
 
-// Initialize the Mistral AI client
+// Initialize the AI client
 const client = new MistralClient(process.env.MISTRAL_API_KEY || "");
 
 export async function POST(req: NextRequest) {
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Format messages for Mistral AI
+    // Format messages for AI
     const formattedMessages = messages.map((message: any) => ({
       role: message.role,
       content: message.content,
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     // Add system message at the beginning
     formattedMessages.unshift(systemMessage);
 
-    // Call Mistral AI API
+    // Call AI API
     const response = await client.chat({
       model: "mistral-large-latest",
       messages: formattedMessages,
@@ -56,6 +56,16 @@ export async function POST(req: NextRequest) {
 
     // Extract the assistant's response
     const assistantResponse = response.choices[0].message;
+    
+    // Ensure we always have content
+    if (!assistantResponse.content || assistantResponse.content.trim() === "") {
+      return NextResponse.json({
+        role: "assistant",
+        content: "I'm sorry, I couldn't generate a response. Please try again.",
+        id: Date.now().toString(),
+        timestamp: new Date(),
+      });
+    }
 
     return NextResponse.json({
       role: "assistant",
@@ -65,9 +75,15 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error in chat API:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    
+    const fallbackResponse = {
+      role: "assistant",
+      content: "I'm sorry, I encountered an error processing your request. Please try again later.",
+      id: Date.now().toString(),
+      timestamp: new Date(),
+    };
+    
+    // Return a fallback response instead of an error
+    return NextResponse.json(fallbackResponse);
   }
 } 

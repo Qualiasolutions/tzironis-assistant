@@ -21,11 +21,11 @@ export const translations = {
     chatError: "I'm sorry, I encountered an error processing your request. Please try again later.",
     startListening: "Start listening",
     stopListening: "Stop listening",
-    poweredByMistral: "Powered by Mistral AI",
+    poweredByMistral: "",
     
     // Home Page
     homeTitle: "QUALIA Assistant",
-    homeSubtitle: "Intelligent business assistant for Tzironis, powered by Mistral AI",
+    homeSubtitle: "Intelligent business assistant for Tzironis",
     featureWebsiteKnowledge: "Website Knowledge Base",
     featureWebsiteDesc: "Access and search information from the Tzironis website using natural language",
     featureInvoice: "Invoice Automation",
@@ -42,7 +42,7 @@ export const translations = {
     
     // Feature cards
     featuresChatTitle: "AI Chat",
-    featuresChatDesc: "Intelligent conversations powered by Mistral AI",
+    featuresChatDesc: "Intelligent conversations with advanced AI",
     featuresKnowledgeTitle: "Knowledge Base",
     featuresKnowledgeDesc: "Access information from the Tzironis website",
     featuresInvoiceTitle: "Invoice Automation",
@@ -126,11 +126,11 @@ export const translations = {
     chatError: "Λυπούμαι, αντιμετώπισα ένα πρόβλημα επεξεργάζοντας την αίτησή σας. Παρακαλώ προσπαθήστε αργότερα.",
     startListening: "Έναρξη ακρόασης",
     stopListening: "Διακοπή ακρόασης",
-    poweredByMistral: "Με τεχνολογία Mistral AI",
+    poweredByMistral: "",
     
     // Home Page
     homeTitle: "QUALIA Βοηθός",
-    homeSubtitle: "Έξυπνος επιχειρηματικός βοηθός για την Tzironis, με τεχνολογία Mistral AI",
+    homeSubtitle: "Έξυπνος επιχειρηματικός βοηθός για την Tzironis",
     featureWebsiteKnowledge: "Βάση Γνώσεων Ιστοσελίδας",
     featureWebsiteDesc: "Πρόσβαση και αναζήτηση πληροφοριών από την ιστοσελίδα Tzironis με φυσική γλώσσα",
     featureInvoice: "Αυτοματισμός Τιμολογίων",
@@ -147,7 +147,7 @@ export const translations = {
     
     // Feature cards
     featuresChatTitle: "Συνομιλία AI",
-    featuresChatDesc: "Έξυπνες συνομιλίες με τεχνολογία Mistral AI",
+    featuresChatDesc: "Έξυπνες συνομιλίες με προηγμένη τεχνητή νοημοσύνη",
     featuresKnowledgeTitle: "Βάση Γνώσεων",
     featuresKnowledgeDesc: "Πρόσβαση σε πληροφορίες από τον ιστότοπο Tzironis",
     featuresInvoiceTitle: "Αυτοματισμός Τιμολογίων",

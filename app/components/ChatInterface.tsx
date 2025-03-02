@@ -144,7 +144,7 @@ export default function ChatInterface() {
         <div className="mt-2 flex justify-center">
           <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center">
             <Sparkles className="h-3 w-3 mr-1 text-primary" />
-            {t("poweredBy")} Mistral AI
+            {t("poweredBy")} QUALIA
           </span>
         </div>
       </div>

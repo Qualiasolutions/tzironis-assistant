@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { Invoice, InvoiceItem } from "@/app/types";
 import { generateId } from "@/app/lib/utils";
 import MistralClient from "@mistralai/mistralai";
+import { extractInvoiceData } from '@/app/lib/invoice-extractor';
 
-// Initialize the Mistral AI client
+// Initialize the AI client
 const mistralClient = new MistralClient(process.env.MISTRAL_API_KEY || "");
 
 // Sample invoice counter (would be stored in a database in production)
@@ -57,7 +58,7 @@ const storedInvoices: Invoice[] = [
 async function parseInvoiceCommand(command: string): Promise<Invoice | null> {
   try {
     // In a real implementation, we would use LLM to parse the command
-    // Here's a simplified version of what we'd do with Mistral AI
+    // Here's a simplified version of what we'd do with advanced AI
     const response = await mistralClient.chat({
       model: "mistral-large-latest",
       messages: [

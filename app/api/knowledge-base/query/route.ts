@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       similarity: result.similarity,
     }));
 
-    // Initialize Mistral client
+    // Initialize AI client
     const mistral = new MistralClient(mistralApiKey);
 
     // Prepare the prompt
@@ -66,7 +66,7 @@ Provide a concise, helpful, and accurate answer. If the information does not com
 
 DO NOT make up or infer information that is not present in the provided context. If you don't know the answer, say so.`;
 
-    // Call Mistral API to generate the answer
+    // Call AI API to generate the answer
     const response = await mistral.chat({
       model: "mistral-large-latest",
       messages: [

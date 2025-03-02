@@ -79,7 +79,7 @@ export default function Home() {
               {t("poweredBy")}
             </div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-              <span className="gradient-text">Mistral AI</span>
+              <span className="gradient-text">QUALIA</span>
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               {t("aiDescription")}
