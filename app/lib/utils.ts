@@ -2,10 +2,10 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
- * Combines class names with Tailwind CSS classes
+ * Combines class names
  */
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+export function classNames(...classes: (string | undefined | boolean | null)[]): string {
+  return classes.filter(Boolean).join(' ');
 }
 
 /**

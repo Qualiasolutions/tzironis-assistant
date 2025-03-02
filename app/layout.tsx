@@ -4,8 +4,8 @@ import "./globals.css";
 import { LanguageProvider } from "./lib/LanguageContext";
 import { AuthProvider } from "./providers";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-geist" });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
 
 export const metadata: Metadata = {
   title: "Qualia AI | Intelligent Business Assistant for Tzironis",
@@ -23,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} bg-white text-gray-900 min-h-screen`}>
+    <html lang="en" className="smooth-scroll">
+      <body className={`${inter.variable} ${jetbrainsMono.variable} main-body`}>
         <AuthProvider>
           <LanguageProvider>
             {children}
