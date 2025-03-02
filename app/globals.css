@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  /* Base colors */
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
+  /* Base colors - Modern blue/purple palette */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
   --accent: #8b5cf6;
   --accent-hover: #7c3aed;
   --success: #10b981;
@@ -19,7 +19,7 @@
   --card: #ffffff;
   --card-foreground: #1e293b;
   --border: #e2e8f0;
-  --ring: rgba(59, 130, 246, 0.3);
+  --ring: rgba(79, 70, 229, 0.3);
   
   /* UI component colors */
   --muted: #f8fafc;
@@ -34,8 +34,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Dark mode colors */
-    --primary: #3b82f6;
-    --primary-hover: #60a5fa;
+    --primary: #6366f1;
+    --primary-hover: #818cf8;
     --accent: #8b5cf6;
     --accent-hover: #a78bfa;
     
@@ -45,7 +45,7 @@
     --card: #1e293b;
     --card-foreground: #f1f5f9;
     --border: #334155;
-    --ring: rgba(59, 130, 246, 0.3);
+    --ring: rgba(99, 102, 241, 0.3);
     
     /* UI component colors */
     --muted: #1e293b;
@@ -71,16 +71,16 @@ body {
 @layer components {
   /* Modern buttons */
   .btn-primary {
-    @apply inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-10 items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
   }
   
   .btn-secondary {
-    @apply inline-flex h-10 items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-all hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-10 items-center justify-center rounded-full bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
   }
   
   /* Cards */
   .card {
-    @apply rounded-xl border border-border bg-card p-6 shadow-sm transition-all;
+    @apply rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-800 p-6 shadow-sm transition-all hover:shadow-md;
   }
   
   /* Message bubbles */
@@ -93,27 +93,40 @@ body {
   }
   
   .message-bubble.assistant {
-    @apply bg-secondary dark:bg-gray-800 text-foreground dark:text-white rounded-tl-sm border border-border dark:border-gray-700;
+    @apply bg-white dark:bg-gray-800 text-foreground dark:text-white rounded-tl-sm border border-gray-200 dark:border-gray-700 shadow-sm;
   }
 
   /* Feature cards */
   .feature-card {
-    @apply relative overflow-hidden rounded-xl border border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm p-8 shadow-md transition-all hover:shadow-lg hover:translate-y-[-2px];
+    @apply relative overflow-hidden rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-800 p-8 shadow-md transition-all hover:shadow-xl hover:translate-y-[-3px];
   }
   
   /* Hover card effect */
   .hover-card-effect {
-    @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.02];
+    @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.03];
   }
   
   /* Glass effect */
   .glass-effect {
-    @apply backdrop-blur-md bg-white/70 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50;
+    @apply backdrop-blur-md bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 shadow-sm;
   }
   
   /* Gradient text */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary via-accent to-purple-500 bg-clip-text text-transparent;
+  }
+
+  /* Nav link */
+  .nav-link {
+    @apply relative px-3 py-2 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors;
+  }
+
+  .nav-link.active {
+    @apply text-primary dark:text-primary bg-primary/5 dark:bg-primary/10;
+  }
+
+  .nav-link.active::after {
+    @apply content-[''] absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full;
   }
 }
 
@@ -136,10 +149,19 @@ body {
   animation: slide-up 0.4s ease forwards;
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Scroll styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {

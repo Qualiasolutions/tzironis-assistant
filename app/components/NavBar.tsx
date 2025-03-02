@@ -17,6 +17,7 @@ import {
   User as UserIcon,
   Moon,
   Sun,
+  ChevronDown,
 } from "lucide-react";
 import { useLanguage } from "@/app/lib/LanguageContext";
 
@@ -97,7 +98,7 @@ export default function NavBar() {
     <nav
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         scrolled 
-          ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm" 
+          ? "glass-effect shadow-sm border-b border-gray-200/50 dark:border-gray-700/50" 
           : "bg-white dark:bg-gray-900"
       }`}
     >
@@ -106,11 +107,13 @@ export default function NavBar() {
           <div className="flex items-center">
             <Link 
               href="/" 
-              className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 text-primary hover:opacity-90 transition-all"
               onClick={closeMenus}
             >
-              <Brain className="h-8 w-8" />
-              <span className="text-xl font-bold hidden sm:block">QUALIA</span>
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover-card-effect">
+                <Brain className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xl font-bold hidden sm:block gradient-text">QUALIA</span>
             </Link>
           </div>
 
@@ -151,7 +154,7 @@ export default function NavBar() {
             {/* Language toggle button */}
             <button
               onClick={toggleLanguage}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 text-sm font-medium"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 text-sm font-medium"
             >
               {language === "en" ? "EL" : "EN"}
             </button>
@@ -162,15 +165,16 @@ export default function NavBar() {
                 <div className="relative">
                   <button
                     onClick={toggleProfile}
-                    className="flex items-center gap-1.5 p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+                    className="flex items-center gap-1.5 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
                   >
                     <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                       {session.user?.name?.charAt(0) || <UserIcon className="h-4 w-4" />}
                     </span>
+                    <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" />
                   </button>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+                    <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden animate-fadein">
                       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {session.user?.name || t("user")}
@@ -194,7 +198,7 @@ export default function NavBar() {
               ) : (
                 <button
                   onClick={handleSignIn}
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-hover transition-colors"
+                  className="btn-primary"
                 >
                   <LogIn className="h-4 w-4 mr-1.5" />
                   {t("signIn")}
@@ -205,7 +209,7 @@ export default function NavBar() {
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400"
                 onClick={toggleMenu}
               >
                 {isMenuOpen ? (
@@ -276,14 +280,12 @@ function NavLink({ href, active, onClick, children }: NavLinkProps) {
   return (
     <Link
       href={href}
-      className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-        active
-          ? "bg-primary/10 text-primary dark:bg-primary/20"
-          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-      }`}
       onClick={onClick}
+      className={`nav-link ${active ? 'active' : ''}`}
     >
-      {children}
+      <div className="flex items-center">
+        {children}
+      </div>
     </Link>
   );
 }
@@ -292,12 +294,12 @@ function MobileNavLink({ href, active, onClick, children }: NavLinkProps) {
   return (
     <Link
       href={href}
-      className={`flex items-center rounded-md py-2 px-3 text-base font-medium ${
+      onClick={onClick}
+      className={`flex items-center rounded-lg py-2 px-3 text-base font-medium ${
         active
-          ? "bg-primary/10 text-primary dark:bg-primary/20"
+          ? "text-primary dark:text-primary bg-primary/5 dark:bg-primary/10"
           : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
       }`}
-      onClick={onClick}
     >
       {children}
     </Link>
