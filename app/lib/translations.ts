@@ -8,13 +8,20 @@ export const translations = {
     
     // Chat
     chatWelcome: "Hello! I'm Qualia, your business assistant for Tzironis. How can I help you today?",
+    chatWelcomeMessage: "Hello! I'm Qualia, your business assistant for Tzironis. How can I help you today?",
     chatPlaceholder: "Type your message here...",
+    typeMessage: "Type your message here...",
+    sendMessage: "Send message",
+    errorMessage: "I'm sorry, I encountered an error processing your request. Please try again later.",
     microphoneOn: "Listening... Click to stop",
     microphoneOff: "Click to speak",
     playResponse: "Play",
     stopPlayback: "Stop",
     redirectToTzironis: "I'll take you to the Tzironis website right away!",
     chatError: "I'm sorry, I encountered an error processing your request. Please try again later.",
+    startListening: "Start listening",
+    stopListening: "Stop listening",
+    poweredByMistral: "Powered by Mistral AI",
     
     // Home Page
     homeTitle: "QUALIA Assistant",
@@ -29,6 +36,9 @@ export const translations = {
     footerRights: "All rights reserved.",
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Service",
+    poweredBy: "Powered by",
+    aiDescription: "Leveraging advanced language models to provide intelligent assistance for your business needs",
+    exploreFeature: "Explore",
     
     // Feature cards
     featuresChatTitle: "AI Chat",
@@ -103,13 +113,20 @@ export const translations = {
     
     // Chat
     chatWelcome: "Γειά! Είμαι ο QUALIA, ο επιχειρηματικός βοηθός σας για την Tzironis. Πώς μπορώ να σας βοηθήσω σήμερα?",
+    chatWelcomeMessage: "Γειά! Είμαι ο QUALIA, ο επιχειρηματικός βοηθός σας για την Tzironis. Πώς μπορώ να σας βοηθήσω σήμερα?",
     chatPlaceholder: "Πληκτρολογήστε το μήνυμά σας εδώ...",
+    typeMessage: "Πληκτρολογήστε το μήνυμά σας εδώ...",
+    sendMessage: "Αποστολή μηνύματος",
+    errorMessage: "Λυπούμαι, αντιμετώπισα ένα πρόβλημα επεξεργάζοντας την αίτησή σας. Παρακαλώ προσπαθήστε αργότερα.",
     microphoneOn: "Ακούω... Κάντε κλικ για να σταματήσετε",
     microphoneOff: "Κάντε κλικ για να μιλήσετε",
     playResponse: "Αναπαραγωγή",
     stopPlayback: "Σταμάτησε",
     redirectToTzironis: "Θα σας πάρω στον ιστότοπο Tzironis αμέσως!",
     chatError: "Λυπούμαι, αντιμετώπισα ένα πρόβλημα επεξεργάζοντας την αίτησή σας. Παρακαλώ προσπαθήστε αργότερα.",
+    startListening: "Έναρξη ακρόασης",
+    stopListening: "Διακοπή ακρόασης",
+    poweredByMistral: "Με τεχνολογία Mistral AI",
     
     // Home Page
     homeTitle: "QUALIA Βοηθός",
@@ -124,6 +141,9 @@ export const translations = {
     footerRights: "Όλα τα δικαιώματα διατηρούνται.",
     footerPrivacy: "Πολιτική Απορρήτου",
     footerTerms: "Όροι Χρήσης",
+    poweredBy: "Με τεχνολογία",
+    aiDescription: "Αξιοποίηση προηγμένων μοντέλων γλώσσας για την παροχή έξυπνης βοήθειας για τις επιχειρηματικές σας ανάγκες",
+    exploreFeature: "Εξερεύνηση",
     
     // Feature cards
     featuresChatTitle: "Συνομιλία AI",

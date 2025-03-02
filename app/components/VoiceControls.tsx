@@ -1,143 +1,89 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Play, Square } from 'lucide-react';
-import { useLanguage } from '../lib/LanguageContext';
-import { 
-  isSpeechRecognitionSupported, 
-  isSpeechSynthesisSupported,
-  initSpeechRecognition,
-  speakText
-} from '../lib/speech';
+import { useState, useEffect } from "react";
+import { Mic, MicOff, Volume2 } from "lucide-react";
+import { useLanguage } from "@/app/lib/LanguageContext";
+import { initSpeechRecognition, speakText } from "@/app/lib/speech";
+import { LocaleType } from "@/app/lib/i18n";
 
-interface MicrophoneButtonProps {
-  onTranscript: (text: string) => void;
-  disabled?: boolean;
+interface VoiceControlsProps {
+  onTextInput: (text: string) => void;
 }
 
-export function MicrophoneButton({ onTranscript, disabled = false }: MicrophoneButtonProps) {
-  const { language, t } = useLanguage();
+export default function VoiceControls({ onTextInput }: VoiceControlsProps) {
   const [isListening, setIsListening] = useState(false);
-  const [supported, setSupported] = useState(false);
-  
+  const [transcript, setTranscript] = useState("");
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const { t, language } = useLanguage();
+
   useEffect(() => {
-    // Check if speech recognition is supported
-    setSupported(isSpeechRecognitionSupported());
-  }, []);
-  
-  const toggleListening = useCallback(() => {
-    if (!supported || disabled) return;
-    
-    if (isListening) {
-      setIsListening(false);
-      return;
-    }
-    
-    setIsListening(true);
-    
-    const speechRecognition = initSpeechRecognition(
-      language,
-      (result) => {
-        if (result.isFinal) {
-          onTranscript(result.transcript);
+    // Initialize speech recognition
+    try {
+      const recognitionInstance = initSpeechRecognition(language);
+      
+      if (recognitionInstance) {
+        recognitionInstance.onresult = (event) => {
+          const current = event.resultIndex;
+          const transcript = event.results[current][0].transcript;
+          setTranscript(transcript);
+          onTextInput(transcript);
+        };
+
+        recognitionInstance.onend = () => {
           setIsListening(false);
-        }
-      },
-      () => setIsListening(false)
-    );
-    
-    speechRecognition.start();
-    
-    // Safety timeout - stop listening after 10 seconds if nothing is said
-    setTimeout(() => {
-      if (isListening) {
-        speechRecognition.stop();
-        setIsListening(false);
+        };
+
+        recognitionInstance.onerror = (event) => {
+          console.error("Speech recognition error", event.error);
+          setIsListening(false);
+        };
+
+        setRecognition(recognitionInstance);
       }
-    }, 10000);
-  }, [language, onTranscript, isListening, supported, disabled]);
-  
-  if (!supported) return null;
-  
-  return (
-    <button
-      onClick={toggleListening}
-      disabled={disabled}
-      className={`relative h-10 w-10 flex items-center justify-center rounded-full transition-colors ${
-        isListening
-          ? 'bg-red-500 text-white animate-pulse'
-          : 'bg-primary text-white hover:bg-accent disabled:opacity-50'
-      }`}
-      aria-label={isListening ? t('microphoneOn') : t('microphoneOff')}
-      title={isListening ? t('microphoneOn') : t('microphoneOff')}
-    >
-      {isListening ? (
-        <MicOff className="h-5 w-5" />
-      ) : (
-        <Mic className="h-5 w-5" />
-      )}
-    </button>
-  );
-}
-
-interface SpeakButtonProps {
-  text: string;
-  disabled?: boolean;
-}
-
-export function SpeakButton({ text, disabled = false }: SpeakButtonProps) {
-  const { language, t } = useLanguage();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [supported, setSupported] = useState(false);
-  
-  useEffect(() => {
-    // Check if speech synthesis is supported
-    setSupported(isSpeechSynthesisSupported());
-  }, []);
-  
-  const toggleSpeech = useCallback(() => {
-    if (!supported || disabled || !text) return;
-    
-    if (isPlaying) {
-      window.speechSynthesis.cancel();
-      setIsPlaying(false);
-      return;
+    } catch (error) {
+      console.error("Speech recognition not supported", error);
     }
-    
-    setIsPlaying(true);
-    
-    const speech = speakText(text, language);
-    speech.start();
-    speech.onEnd(() => {
-      setIsPlaying(false);
-    });
-  }, [language, text, isPlaying, supported, disabled]);
-  
-  if (!supported || !text) return null;
-  
+
+    return () => {
+      if (recognition) {
+        recognition.abort();
+      }
+    };
+  }, [language]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognition?.abort();
+      setIsListening(false);
+    } else if (recognition) {
+      try {
+        recognition.start();
+        setIsListening(true);
+        setTranscript("");
+      } catch (error) {
+        console.error("Failed to start speech recognition", error);
+      }
+    }
+  };
+
   return (
-    <button
-      onClick={toggleSpeech}
-      disabled={disabled}
-      className={`flex items-center justify-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
-        isPlaying
-          ? 'bg-red-500 text-white'
-          : 'bg-primary text-white hover:bg-accent disabled:opacity-50'
-      }`}
-      aria-label={isPlaying ? t('stopPlayback') : t('playResponse')}
-      title={isPlaying ? t('stopPlayback') : t('playResponse')}
-    >
-      {isPlaying ? (
-        <>
-          <Square className="h-3 w-3" />
-          {t('stopPlayback')}
-        </>
-      ) : (
-        <>
-          <Play className="h-3 w-3" />
-          {t('playResponse')}
-        </>
-      )}
-    </button>
+    <div className="flex gap-2">
+      <button
+        onClick={toggleListening}
+        className={`flex items-center justify-center w-12 h-12 rounded-full transition-all ${
+          isListening
+            ? "bg-red-500 text-white hover:bg-red-600 animate-pulse"
+            : "bg-primary/10 text-primary hover:bg-primary/20"
+        } hover-card-effect`}
+        aria-label={isListening ? t("stopListening") : t("startListening")}
+        title={isListening ? t("stopListening") : t("startListening")}
+      >
+        {isListening ? (
+          <MicOff className="h-5 w-5" />
+        ) : (
+          <Mic className="h-5 w-5" />
+        )}
+      </button>
+    </div>
   );
 } 

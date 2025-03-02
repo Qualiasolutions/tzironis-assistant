@@ -1,43 +1,26 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Send, Brain, ArrowLeft, ExternalLink } from "lucide-react";
-import Link from "next/link";
-import axios from "axios";
-import { useLanguage } from "../lib/LanguageContext";
-import { MicrophoneButton, SpeakButton } from "./VoiceControls";
-
-type Message = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-};
+import { useState, useEffect, useRef } from "react";
+import { useLanguage } from "@/app/lib/LanguageContext";
+import MessageBubble from "./MessageBubble";
+import { Message } from "@/app/lib/types";
+import VoiceControls from "./VoiceControls";
+import { Send, Bot, Sparkles } from "lucide-react";
 
 export default function ChatInterface() {
-  const { t, language } = useLanguage();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content: "",
-      timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { t, language } = useLanguage();
 
-  // Update welcome message when language changes
   useEffect(() => {
-    setMessages([
-      {
-        id: "welcome",
-        role: "assistant",
-        content: t("chatWelcome"),
-        timestamp: new Date(),
-      },
-    ]);
+    // Set welcome message
+    setMessages([{
+      role: "assistant",
+      content: t("chatWelcomeMessage"),
+    }]);
   }, [language, t]);
 
   useEffect(() => {
@@ -48,181 +31,96 @@ export default function ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Function to check if the user is asking about Tzironis website
-  const shouldRedirectToTzironis = (input: string): boolean => {
-    const lowerInput = input.toLowerCase();
-    return (
-      (lowerInput.includes("tzironis") || lowerInput.includes("tzironis.gr")) &&
-      (lowerInput.includes("website") || 
-       lowerInput.includes("visit") || 
-       lowerInput.includes("go to") || 
-       lowerInput.includes("open") ||
-       lowerInput.includes("show me") ||
-       lowerInput.includes("take me"))
-    );
-  };
+  const handleSendMessage = async () => {
+    if (inputValue.trim() === "" || isLoading) return;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    // Check if we should redirect to tzironis.gr
-    const redirectToTzironis = shouldRedirectToTzironis(input);
-
-    // Add user message
     const userMessage: Message = {
-      id: Date.now().toString(),
       role: "user",
-      content: input,
-      timestamp: new Date(),
+      content: inputValue,
     };
-    
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInputValue("");
     setIsLoading(true);
 
     try {
-      if (redirectToTzironis) {
-        // Add a response message about redirection
-        const redirectMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: t("redirectToTzironis"),
-          timestamp: new Date(),
-        };
-        
-        setMessages((prev) => [...prev, redirectMessage]);
-        
-        // Delay redirection slightly so user can see the message
-        setTimeout(() => {
-          window.open("https://tzironis.gr", "_blank");
-        }, 1000);
-      } else {
-        // Format messages for API (excluding timestamps and IDs)
-        const apiMessages = messages.concat(userMessage).map(({ role, content }) => ({
-          role,
-          content,
-        }));
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          language,
+        }),
+      });
 
-        // Call the API
-        const response = await axios.post("/api/chat", {
-          messages: apiMessages,
-          language, // Pass current language to the API
-        });
-
-        // Add assistant response
-        const assistantMessage = {
-          ...response.data,
-          timestamp: new Date(response.data.timestamp),
-        };
-
-        setMessages((prev) => [...prev, assistantMessage]);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
       }
+
+      const data = await response.json();
+      
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: "assistant", content: data.message },
+      ]);
     } catch (error) {
       console.error("Error sending message:", error);
-      
-      // Add error message
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: t("chatError"),
-        timestamp: new Date(),
-      };
-      
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          role: "assistant",
+          content: t("errorMessage"),
+        },
+      ]);
     } finally {
       setIsLoading(false);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
-  // Handle voice transcript
-  const handleVoiceTranscript = (transcript: string) => {
-    setInput(transcript);
-    if (transcript.trim()) {
-      // Auto-submit after voice input
-      setTimeout(() => {
-        const formEvent = { preventDefault: () => {} } as React.FormEvent;
-        handleSubmit(formEvent);
-      }, 500);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
+  };
+
+  const handleTextInput = (text: string) => {
+    setInputValue(text);
   };
 
   return (
-    <div className="flex h-screen flex-col bg-white">
-      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="mr-2 rounded-full p-1 hover:bg-primary/10 transition-colors">
-            <ArrowLeft className="h-5 w-5 text-primary" />
-          </Link>
-          <Brain className="h-7 w-7 text-primary" />
-          <h1 className="text-xl font-bold text-primary">Qualia</h1>
-        </div>
-        <a 
-          href="https://tzironis.gr" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center text-sm text-primary hover:underline"
-        >
-          <span>tzironis.gr</span>
-          <ExternalLink className="ml-1 h-3 w-3" />
-        </a>
-      </header>
-
-      <div className="flex-1 overflow-y-auto p-4 bg-white">
-        <div className="mx-auto max-w-3xl">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`mb-4 flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
+    <div className="flex flex-col h-full max-w-4xl mx-auto">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 mb-4 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent opacity-70 pointer-events-none"></div>
+        <div className="relative z-10 space-y-4">
+          {messages.map((message, index) => (
+            <div 
+              key={index}
+              className={`animate-fadein`}
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div
-                className={`message-bubble px-4 py-2 max-w-[80%] ${
-                  message.role === "user"
-                    ? "user-message bg-primary text-white"
-                    : "assistant-message bg-white border border-primary/20 text-gray-900 shadow-sm"
-                }`}
-              >
-                <div className="whitespace-pre-wrap">{message.content}</div>
-                <div
-                  className={`flex justify-between items-center mt-1 ${
-                    message.role === "user"
-                      ? "text-white/80"
-                      : "text-gray-500"
-                  }`}
-                >
-                  <span className="text-xs">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                  
-                  {message.role === "assistant" && (
-                    <SpeakButton 
-                      text={message.content} 
-                      disabled={isLoading}
-                    />
-                  )}
-                </div>
-              </div>
+              <MessageBubble
+                message={message}
+                showAvatar={true}
+              />
             </div>
           ))}
           {isLoading && (
-            <div className="mb-4 flex justify-start">
-              <div className="message-bubble assistant-message border border-primary/20 bg-white px-4 py-3 shadow-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-primary"></div>
-                  <div
-                    className="h-2 w-2 animate-bounce rounded-full bg-primary"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                  <div
-                    className="h-2 w-2 animate-bounce rounded-full bg-primary"
-                    style={{ animationDelay: "0.4s" }}
-                  ></div>
+            <div className="message-bubble assistant flex items-center p-4 rounded-xl max-w-[80%] animate-pulse bg-white/80 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+              <div className="flex-shrink-0 mr-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-primary" />
                 </div>
+              </div>
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0s" }}></div>
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0.4s" }}></div>
               </div>
             </div>
           )}
@@ -230,33 +128,35 @@ export default function ChatInterface() {
         </div>
       </div>
 
-      <div className="border-t bg-white p-4 shadow-sm">
-        <form
-          onSubmit={handleSubmit}
-          className="mx-auto flex max-w-3xl items-center gap-2"
-        >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={t("chatPlaceholder")}
-            className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary transition-colors"
-            disabled={isLoading}
-          />
-          
-          <MicrophoneButton 
-            onTranscript={handleVoiceTranscript}
-            disabled={isLoading}
-          />
-          
-          <button
-            type="submit"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white hover:bg-accent disabled:opacity-50 transition-colors"
-            disabled={isLoading || !input.trim()}
-          >
-            <Send className="h-5 w-5" />
-          </button>
-        </form>
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-800/50 backdrop-blur-md rounded-t-xl">
+        <div className="relative flex items-end gap-2">
+          <div className="relative flex-1">
+            <textarea
+              ref={inputRef}
+              className="w-full p-3 pr-12 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 resize-none min-h-[56px] max-h-[200px] focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none"
+              placeholder={t("typeMessage")}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              style={{ height: Math.min(Math.max(56, inputValue.split('\n').length * 24 + 24), 200) + 'px' }}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={inputValue.trim() === "" || isLoading}
+              className="absolute right-2 bottom-2 p-2 bg-primary text-white rounded-lg disabled:opacity-50 hover:bg-accent hover-card-effect transition-all"
+              aria-label={t("sendMessage")}
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+          <VoiceControls onTextInput={handleTextInput} />
+        </div>
+        
+        <div className="mt-3 text-xs text-center text-gray-500 dark:text-gray-400 flex justify-center items-center space-x-1">
+          <Sparkles className="h-3 w-3" />
+          <span>{t("poweredByMistral")}</span>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useContext, ReactNode } from "react";
+import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { translations } from "./translations";
 
 type Language = "en" | "el";
@@ -10,6 +10,7 @@ interface LanguageContextType {
   language: Language;
   t: (key: keyof Translations["en"]) => string;
   changeLanguage: (lang: Language) => void;
+  toggleLanguage: () => void;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -30,18 +31,23 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const toggleLanguage = () => {
+    const newLanguage = language === "en" ? "el" : "en";
+    changeLanguage(newLanguage);
+  };
+
   // Initialize language preference from localStorage
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const savedLanguage = localStorage.getItem("language") as Language;
       if (savedLanguage && (savedLanguage === "en" || savedLanguage === "el")) {
         setLanguage(savedLanguage);
       }
     }
-  });
+  }, []);
 
   return (
-    <LanguageContext.Provider value={{ language, t, changeLanguage }}>
+    <LanguageContext.Provider value={{ language, t, changeLanguage, toggleLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
