@@ -5,15 +5,23 @@ import { PineconeStore } from "@langchain/pinecone";
 import * as cheerio from "cheerio";
 import puppeteer from "puppeteer";
 import { v4 as uuidv4 } from "uuid";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { MistralEmbeddings } from "./mistral-embeddings";
+import { Embeddings } from "@langchain/core/embeddings";
 
 interface CrawlStats {
   pagesProcessed: number;
   chunksStored: number;
 }
 
+export interface FileProcessResult {
+  filename: string;
+  chunksStored: number;
+}
+
 export class KnowledgeBase {
   private pineconeClient: Pinecone;
-  private embeddings: OpenAIEmbeddings;
+  private embeddings: Embeddings;
   private namespace: string;
   private index: string;
   private maxPages: number;
@@ -25,13 +33,15 @@ export class KnowledgeBase {
     pineconeApiKey,
     pineconeIndex,
     openaiApiKey,
-    namespace = "tzironis-kb",
+    mistralApiKey,
+    namespace = "tzironis-kb-mistral",
     maxPages = 50,
     maxDepth = 3,
   }: {
     pineconeApiKey: string;
     pineconeIndex: string;
-    openaiApiKey: string;
+    openaiApiKey?: string;
+    mistralApiKey?: string;
     namespace?: string;
     maxPages?: number;
     maxDepth?: number;
@@ -39,10 +49,21 @@ export class KnowledgeBase {
     this.pineconeClient = new Pinecone({
       apiKey: pineconeApiKey,
     });
-    this.embeddings = new OpenAIEmbeddings({
-      openAIApiKey: openaiApiKey,
-      modelName: "text-embedding-3-small",
-    });
+    
+    // Use Mistral embeddings if available, otherwise fallback to OpenAI
+    if (mistralApiKey) {
+      this.embeddings = new MistralEmbeddings({
+        apiKey: mistralApiKey,
+      });
+    } else if (openaiApiKey) {
+      this.embeddings = new OpenAIEmbeddings({
+        openAIApiKey: openaiApiKey,
+        modelName: "text-embedding-3-small",
+      });
+    } else {
+      throw new Error("Either Mistral or OpenAI API key is required for embeddings");
+    }
+    
     this.namespace = namespace;
     this.index = pineconeIndex;
     this.maxPages = maxPages;
@@ -92,7 +113,10 @@ export class KnowledgeBase {
 
     try {
       // Launch headless browser
-      const browser = await puppeteer.launch({ headless: true });
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
       const page = await browser.newPage();
       
       // Set timeout to prevent hanging on slow pages
@@ -235,6 +259,7 @@ export class KnowledgeBase {
             title,
             chunkIndex: chunks.length,
             totalChunks: Math.ceil(fullText.length / (chunkSize - overlap)),
+            source: "web",
           },
         })
       );
@@ -265,6 +290,64 @@ export class KnowledgeBase {
   }
 
   /**
+   * Process a file and add it to the knowledge base
+   */
+  async processFile(
+    filename: string,
+    content: string,
+    fileType: string
+  ): Promise<FileProcessResult> {
+    try {
+      // Create a text splitter
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
+      
+      // Split the text into chunks
+      const rawChunks = await splitter.createDocuments([content]);
+      
+      // Add metadata to chunks
+      const chunks = rawChunks.map((chunk) => 
+        new Document({
+          pageContent: chunk.pageContent,
+          metadata: {
+            id: uuidv4(),
+            filename,
+            fileType,
+            title: filename,
+            source: "file",
+          },
+        })
+      );
+      
+      // Store the chunks
+      await this.storeChunks(chunks);
+      
+      return {
+        filename,
+        chunksStored: chunks.length,
+      };
+    } catch (error) {
+      console.error(`Error processing file ${filename}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete all documents in the knowledge base
+   */
+  async clearAll(): Promise<void> {
+    try {
+      const pineconeIndex = this.pineconeClient.index(this.index);
+      await pineconeIndex.namespace(this.namespace).deleteAll();
+    } catch (error) {
+      console.error("Error clearing knowledge base:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Search the knowledge base for relevant information
    */
   async search(query: string, limit: number = 5): Promise<any[]> {
@@ -281,18 +364,63 @@ export class KnowledgeBase {
         }
       );
       
-      // Search for similar documents
-      const results = await vectorStore.similaritySearch(query, limit);
+      // Search with score
+      const rawResults = await vectorStore.similaritySearchWithScore(query, limit);
       
-      return results.map((doc) => ({
-        content: doc.pageContent,
+      // Process and return results
+      return rawResults.map(([doc, score]) => ({
+        pageContent: doc.pageContent,
         metadata: doc.metadata,
-        // Calculate similarity score (this is a placeholder as PineconeStore doesn't expose scores directly)
-        similarity: 0.85 + Math.random() * 0.15, // Simulate high relevance scores between 0.85-1.0
+        similarity: score,
       }));
     } catch (error) {
       console.error("Error searching knowledge base:", error);
       throw error;
+    }
+  }
+
+  /**
+   * List available sources in the knowledge base
+   */
+  async listSources(): Promise<{ sources: { url?: string; filename?: string; type: string }[] }> {
+    try {
+      const pineconeIndex = this.pineconeClient.index(this.index);
+      
+      // Create vector store
+      const vectorStore = await PineconeStore.fromExistingIndex(
+        this.embeddings,
+        {
+          pineconeIndex,
+          namespace: this.namespace,
+        }
+      );
+      
+      // Query a few documents to examine metadata
+      const results = await vectorStore.similaritySearch("information", 100);
+      
+      // Extract unique sources
+      const sources = new Map<string, { url?: string; filename?: string; type: string }>();
+      
+      results.forEach(doc => {
+        if (doc.metadata.source === "web" && doc.metadata.url) {
+          sources.set(doc.metadata.url, {
+            url: doc.metadata.url,
+            type: "web",
+          });
+        } else if (doc.metadata.source === "file" && doc.metadata.filename) {
+          sources.set(doc.metadata.filename, {
+            filename: doc.metadata.filename,
+            type: "file",
+          });
+        }
+      });
+      
+      return {
+        sources: Array.from(sources.values()),
+      };
+    } catch (error) {
+      console.error("Error listing sources:", error);
+      return { sources: [] };
     }
   }
 

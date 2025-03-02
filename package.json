@@ -40,5 +40,15 @@
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "functions": {
+    "app/api/knowledge-base/crawl/route.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "app/api/knowledge-base/query/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
   }
 }

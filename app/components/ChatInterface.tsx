@@ -96,7 +96,7 @@ export default function ChatInterface() {
   return (
     <div className="flex flex-col h-full w-full bg-white dark:bg-slate-900">
       {/* Chat messages container */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-20">
         {messages.map((message, index) => (
           <MessageBubble key={index} message={message} />
         ))}
@@ -111,8 +111,8 @@ export default function ChatInterface() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input area */}
-      <div className="border-t border-slate-200 dark:border-slate-800 p-4">
+      {/* Input area - fixed at bottom */}
+      <div className="border-t border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900 absolute bottom-0 left-0 right-0">
         <div className="relative flex items-center">
           <VoiceControls 
             onTextInput={handleTextInput} 

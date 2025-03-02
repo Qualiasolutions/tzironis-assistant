@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { KnowledgeBase } from "@/app/lib/knowledge-base";
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const { url, maxPages, maxDepth } = await req.json();
-
-    if (!url) {
+    // Parse the form data
+    const formData = await req.formData();
+    const file = formData.get('file') as File | null;
+    
+    if (!file) {
       return NextResponse.json(
-        { error: "No URL provided" },
+        { error: "No file provided" },
         { status: 400 }
-      );
-    }
-
-    // Check if the URL is allowed (only tzironis.gr)
-    const urlObj = new URL(url);
-    if (!urlObj.hostname.includes('tzironis.gr')) {
-      return NextResponse.json(
-        { error: "Only tzironis.gr domain is allowed" },
-        { status: 403 }
       );
     }
 
@@ -42,20 +43,30 @@ export async function POST(req: NextRequest) {
       openaiApiKey: openAIApiKey,
       mistralApiKey,
       namespace: 'tzironis-kb-mistral',
-      maxPages,
-      maxDepth,
     });
 
-    // Start the crawling process
-    const result = await knowledgeBase.crawlAndProcess(url);
+    // Process the file
+    const filename = file.name;
+    const fileType = file.type;
+    const content = await file.text();
+
+    // Only process if file has content
+    if (!content || content.trim().length < 10) {
+      return NextResponse.json(
+        { error: "File is empty or too small" },
+        { status: 400 }
+      );
+    }
+
+    // Add to knowledge base
+    const result = await knowledgeBase.processFile(filename, content, fileType);
 
     return NextResponse.json({
-      message: "Crawling completed successfully",
-      pagesProcessed: result.pagesProcessed,
-      chunksStored: result.chunksStored,
+      message: "File processed successfully",
+      ...result
     });
   } catch (error: any) {
-    console.error("Error in crawl API:", error);
+    console.error("Error in file upload API:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
       { status: 500 }

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const mistralApiKey = process.env.MISTRAL_API_KEY;
 
     // Validate environment variables
-    if (!pineconeApiKey || !pineconeIndex || !openAIApiKey || !mistralApiKey) {
+    if (!pineconeApiKey || !pineconeIndex || !mistralApiKey) {
       return NextResponse.json(
         { error: "Missing required environment variables" },
         { status: 500 }
@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
       pineconeApiKey,
       pineconeIndex,
       openaiApiKey: openAIApiKey,
-      namespace: 'tzironis-kb',
+      mistralApiKey,
+      namespace: 'tzironis-kb-mistral',
     });
 
     // Search the knowledge base
@@ -41,24 +42,37 @@ export async function POST(req: NextRequest) {
     // If no results found
     if (searchResults.length === 0) {
       return NextResponse.json({
-        answer: "I couldn't find any specific information about that from the Tzironis website. Is there something else you'd like to know?",
+        answer: "I couldn't find any specific information about that from the Tzironis knowledge base. Is there something else you'd like to know?",
         sources: [],
       });
     }
 
     // Extract the content and sources
     const context = searchResults.map(result => result.pageContent).join("\n\n");
-    const sources = searchResults.map(result => ({
-      url: result.metadata.url,
-      title: result.metadata.title,
-      similarity: result.similarity,
-    }));
+    const sources = searchResults.map(result => {
+      // Handle both web and file sources
+      if (result.metadata.source === 'web') {
+        return {
+          url: result.metadata.url,
+          title: result.metadata.title,
+          similarity: result.similarity,
+          type: 'web'
+        };
+      } else {
+        return {
+          filename: result.metadata.filename,
+          title: result.metadata.title || result.metadata.filename,
+          similarity: result.similarity,
+          type: 'file'
+        };
+      }
+    });
 
     // Initialize AI client
     const mistral = new MistralClient(mistralApiKey);
 
     // Prepare the prompt
-    const systemPrompt = `You are a knowledgeable assistant for Tzironis (tzironis.gr). Answer the user's question based ONLY on the following information from the Tzironis website:
+    const systemPrompt = `You are a knowledgeable assistant for Tzironis (tzironis.gr). Answer the user's question based ONLY on the following information from the Tzironis knowledge base:
 
 ${context}
 

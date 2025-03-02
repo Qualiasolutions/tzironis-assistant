@@ -1,26 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { KnowledgeBase } from "@/app/lib/knowledge-base";
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const { url, maxPages, maxDepth } = await req.json();
-
-    if (!url) {
-      return NextResponse.json(
-        { error: "No URL provided" },
-        { status: 400 }
-      );
-    }
-
-    // Check if the URL is allowed (only tzironis.gr)
-    const urlObj = new URL(url);
-    if (!urlObj.hostname.includes('tzironis.gr')) {
-      return NextResponse.json(
-        { error: "Only tzironis.gr domain is allowed" },
-        { status: 403 }
-      );
-    }
-
     // Get environment variables
     const pineconeApiKey = process.env.PINECONE_API_KEY;
     const pineconeIndex = process.env.PINECONE_INDEX;
@@ -42,20 +24,14 @@ export async function POST(req: NextRequest) {
       openaiApiKey: openAIApiKey,
       mistralApiKey,
       namespace: 'tzironis-kb-mistral',
-      maxPages,
-      maxDepth,
     });
 
-    // Start the crawling process
-    const result = await knowledgeBase.crawlAndProcess(url);
+    // List sources
+    const sources = await knowledgeBase.listSources();
 
-    return NextResponse.json({
-      message: "Crawling completed successfully",
-      pagesProcessed: result.pagesProcessed,
-      chunksStored: result.chunksStored,
-    });
+    return NextResponse.json(sources);
   } catch (error: any) {
-    console.error("Error in crawl API:", error);
+    console.error("Error in knowledge base sources API:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
       { status: 500 }
