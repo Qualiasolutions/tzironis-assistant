@@ -1,7 +1,17 @@
-import type { NextConfig } from "next";
+// @ts-check
 
-const nextConfig: NextConfig = {
-  /* config options here */
+/**
+ * @type {import('next').NextConfig}
+ */
+const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  images: {
+    domains: ['tzironis.gr'],
+  },
+  experimental: {
+    serverComponentsExternalPackages: ['puppeteer'],
+  },
 };
 
 export default nextConfig;
