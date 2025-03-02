@@ -82,12 +82,12 @@ async function parseInvoiceCommand(command: string): Promise<Invoice | null> {
     });
 
     // For demo purposes, we'll just create a sample invoice
-    const invoiceId = `INV-${generateId(6)}`;
+    const invoiceId = `INV-${generateId()}`;
     const itemTotal = 10 * 100; // quantity * unitPrice
     
     return {
       id: invoiceId,
-      number: `INV-${new Date().getFullYear()}-${generateId(3)}`,
+      number: `INV-${new Date().getFullYear()}-${generateId().substring(0, 3)}`,
       date: new Date().toISOString(),
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       clientName: "Demo Client",
@@ -188,8 +188,8 @@ export async function POST(req: NextRequest) {
       // Generate ID if not provided
       const newInvoice: Invoice = {
         ...invoice,
-        id: invoice.id || `INV-${generateId(6)}`,
-        number: invoice.number || `INV-${new Date().getFullYear()}-${generateId(3)}`,
+        id: invoice.id || `INV-${generateId()}`,
+        number: invoice.number || `INV-${new Date().getFullYear()}-${generateId().substring(0, 3)}`,
         date: invoice.date || new Date().toISOString(),
         dueDate: invoice.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         status: invoice.status || "pending",
