@@ -129,23 +129,23 @@ body {
 @layer base {
   /* Focus ring styles */
   *:focus-visible {
-    @apply outline-none ring-2 ring-primary/70 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+    @apply outline-none ring-2 ring-primary ring-opacity-70 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
   }
 }
 
 @layer components {
   /* Modern buttons */
   .btn-primary {
-    @apply inline-flex h-10 items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-10 items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-opacity-70 focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
   }
   
   .btn-secondary {
-    @apply inline-flex h-10 items-center justify-center rounded-full bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-10 items-center justify-center rounded-full bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-opacity-70 focus-visible:ring-offset-2 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
   }
   
   /* Cards */
   .card {
-    @apply rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-800 p-6 shadow-sm transition-all hover:shadow-md;
+    @apply rounded-2xl border border-gray-200 border-opacity-50 dark:border-gray-700 dark:border-opacity-50 bg-white dark:bg-gray-800 p-6 shadow-sm transition-all hover:shadow-md;
   }
   
   /* Message bubbles */
@@ -163,7 +163,7 @@ body {
 
   /* Feature cards */
   .feature-card {
-    @apply relative overflow-hidden rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-800 p-8 shadow-md transition-all hover:shadow-xl hover:translate-y-[-3px];
+    @apply relative overflow-hidden rounded-2xl border border-gray-200 border-opacity-50 dark:border-gray-700 dark:border-opacity-50 bg-white dark:bg-gray-800 p-8 shadow-md transition-all hover:shadow-xl hover:translate-y-[-3px];
   }
   
   /* Hover card effect */
@@ -173,7 +173,7 @@ body {
   
   /* Glass effect */
   .glass-effect {
-    @apply backdrop-blur-md bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 shadow-sm;
+    @apply backdrop-blur-md bg-white bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80 border border-gray-200 border-opacity-50 dark:border-gray-700 dark:border-opacity-50 shadow-sm;
   }
   
   /* Gradient text */
@@ -187,7 +187,7 @@ body {
   }
 
   .nav-link.active {
-    @apply text-primary dark:text-primary bg-primary/5 dark:bg-primary/10;
+    @apply text-primary dark:text-primary bg-primary bg-opacity-5 dark:bg-primary dark:bg-opacity-10;
   }
 
   .nav-link.active::after {
