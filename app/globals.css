@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #145199;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f9fc;
+  --secondary-foreground: #171717;
+  --accent: #0e3f7c;
+  --accent-foreground: #ffffff;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --border: #e5e7eb;
+  --input: #e2e8f0;
+  --ring: #145199;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a1629;
+    --foreground: #ffffff;
+    --primary: #145199;
+    --primary-foreground: #ffffff;
+    --secondary: #1a2a42;
+    --secondary-foreground: #ffffff;
+    --accent: #1c62b3;
+    --accent-foreground: #ffffff;
+    --muted: #1a2a42;
+    --muted-foreground: #a1a1aa;
+    --border: #2a3a56;
+    --input: #2a3a56;
+    --ring: #145199;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+}
+
+* {
+  @apply border-[var(--border)];
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Modern chat styling */
+.message-bubble {
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message-bubble:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(20, 81, 153, 0.1);
+}
+
+.user-message {
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  border-bottom-left-radius: 4px;
+}
+
+/* Enhanced button styling */
+button {
+  transition: all 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Modern card effect */
+.hover-card-effect {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card-effect:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(20, 81, 153, 0.12);
+}
+
+/* Feature cards glow effect */
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 8px;
+  padding: 2px;
+  background: linear-gradient(135deg, #145199, #0a3060);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feature-card:hover::before {
+  opacity: 1;
+}
