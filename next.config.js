@@ -5,7 +5,9 @@ const nextConfig = {
   images: {
     domains: ['tzironis.gr'],
   },
-  serverExternalPackages: ['puppeteer'],
+  experimental: {
+    serverComponentsExternalPackages: ['puppeteer'],
+  },
   eslint: {
     // Disable ESLint during build for now (temporary solution)
     ignoreDuringBuilds: true,

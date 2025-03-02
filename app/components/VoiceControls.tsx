@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mic, MicOff, Volume2 } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 import { useLanguage } from "@/app/lib/LanguageContext";
-import { initSpeechRecognition, speakText } from "@/app/lib/speech";
-import { LocaleType } from "@/app/lib/i18n";
+import { initSpeechRecognition } from "@/app/lib/speech";
 
 interface VoiceControlsProps {
   onTextInput: (text: string) => void;
@@ -13,51 +12,44 @@ interface VoiceControlsProps {
 export default function VoiceControls({ onTextInput }: VoiceControlsProps) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [recognitionInstance, setRecognitionInstance] = useState<{ start: () => void; stop: () => void } | null>(null);
   const { t, language } = useLanguage();
 
   useEffect(() => {
     // Initialize speech recognition
     try {
-      const recognitionInstance = initSpeechRecognition(language);
+      const instance = initSpeechRecognition(
+        language,
+        (result) => {
+          if (result.isFinal) {
+            setTranscript(result.transcript);
+            onTextInput(result.transcript);
+          }
+        },
+        () => {
+          setIsListening(false);
+        }
+      );
       
-      if (recognitionInstance) {
-        recognitionInstance.onresult = (event) => {
-          const current = event.resultIndex;
-          const transcript = event.results[current][0].transcript;
-          setTranscript(transcript);
-          onTextInput(transcript);
-        };
-
-        recognitionInstance.onend = () => {
-          setIsListening(false);
-        };
-
-        recognitionInstance.onerror = (event) => {
-          console.error("Speech recognition error", event.error);
-          setIsListening(false);
-        };
-
-        setRecognition(recognitionInstance);
-      }
+      setRecognitionInstance(instance);
     } catch (error) {
       console.error("Speech recognition not supported", error);
     }
 
     return () => {
-      if (recognition) {
-        recognition.abort();
+      if (recognitionInstance) {
+        recognitionInstance.stop();
       }
     };
-  }, [language]);
+  }, [language, onTextInput]);
 
   const toggleListening = () => {
     if (isListening) {
-      recognition?.abort();
+      recognitionInstance?.stop();
       setIsListening(false);
-    } else if (recognition) {
+    } else if (recognitionInstance) {
       try {
-        recognition.start();
+        recognitionInstance.start();
         setIsListening(true);
         setTranscript("");
       } catch (error) {

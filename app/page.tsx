@@ -118,6 +118,8 @@ interface FeatureCardProps {
 }
 
 function FeatureCard({ icon, title, description, href, delay, isLoaded }: FeatureCardProps) {
+  const { t } = useLanguage();
+  
   return (
     <Link 
       href={href}

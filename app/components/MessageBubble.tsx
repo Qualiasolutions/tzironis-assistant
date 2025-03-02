@@ -25,9 +25,11 @@ export default function MessageBubble({ message, showAvatar = false }: MessageBu
     }
 
     setIsSpeaking(true);
-    speakText(message.content, language, () => {
+    const speech = speakText(message.content, language);
+    speech.onEnd(() => {
       setIsSpeaking(false);
     });
+    speech.start();
   };
 
   const copyToClipboard = () => {
