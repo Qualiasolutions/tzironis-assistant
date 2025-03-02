@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Invoice, InvoiceItem } from "@/app/types";
+import { Invoice, InvoiceItem } from "@/app/lib/types";
 import { generateId } from "@/app/lib/utils";
 import MistralClient from "@mistralai/mistralai";
 import { extractInvoiceData } from '@/app/lib/invoice-extractor';
