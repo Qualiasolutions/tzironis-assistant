@@ -10,51 +10,59 @@ const mistralClient = new MistralClient(process.env.MISTRAL_API_KEY || "");
 // Sample invoice counter (would be stored in a database in production)
 let invoiceCounter = 3;
 
-// Sample stored invoices (would be stored in a database in production)
-const storedInvoices: Invoice[] = [
+// Sample invoices (would be stored in a database in production)
+const invoices: Invoice[] = [
   {
     id: "INV-001",
+    number: "INV-2023-001",
+    date: new Date().toISOString(),
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     clientName: "Acme Corp",
     clientVat: "EL123456789",
     clientAddress: "123 Business St, Athens",
     items: [
       {
-        id: "item-1",
         description: "Consulting Services",
         quantity: 10,
         unitPrice: 80,
-        total: 800,
+        amount: 800,
       },
     ],
-    total: 800,
+    subtotal: 800,
     tax: 192,
-    grandTotal: 992,
-    date: new Date(2023, 11, 15),
-    status: "paid",
+    total: 992,
+    status: "pending",
   },
   {
     id: "INV-002",
-    clientName: "TechStart Ltd",
+    number: "INV-2023-002",
+    date: new Date().toISOString(),
+    dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+    clientName: "TechSolutions Ltd",
     clientVat: "EL987654321",
-    clientAddress: "456 Innovation Ave, Thessaloniki",
+    clientAddress: "456 Tech Ave, Thessaloniki",
     items: [
       {
-        id: "item-1",
         description: "Web Development",
         quantity: 1,
-        unitPrice: 1500,
-        total: 1500,
+        unitPrice: 2000,
+        amount: 2000,
+      },
+      {
+        description: "SEO Services",
+        quantity: 1,
+        unitPrice: 500,
+        amount: 500,
       },
     ],
-    total: 1500,
-    tax: 360,
-    grandTotal: 1860,
-    date: new Date(2024, 0, 20),
-    status: "sent",
+    subtotal: 2500,
+    tax: 600,
+    total: 3100,
+    status: "paid",
   },
 ];
 
-// Function to parse natural language commands for invoice creation
+// Function to parse invoice commands
 async function parseInvoiceCommand(command: string): Promise<Invoice | null> {
   try {
     // In a real implementation, we would use LLM to parse the command
@@ -64,68 +72,40 @@ async function parseInvoiceCommand(command: string): Promise<Invoice | null> {
       messages: [
         {
           role: "system",
-          content: 
-            "You are an invoice parsing assistant. Extract the following information from the user's command: " +
-            "client name, items (with description, quantity, and unit price for each), and any additional details. " +
-            "Respond in JSON format only with these fields: clientName, items (array of {description, quantity, unitPrice}), " +
-            "clientVat (if present), clientAddress (if present)."
+          content: "You are an invoice parser. Extract invoice details from the user's command.",
         },
         {
           role: "user",
-          content: command
-        }
-      ],
-      temperature: 0.2,
-    });
-    
-    // In a real implementation, we'd parse the LLM response into structured data
-    // For demo purposes, we'll do a simple parsing of the command
-    
-    // Try to extract client name
-    const clientNameMatch = command.match(/for\s+([^,]+)/i);
-    const clientName = clientNameMatch ? clientNameMatch[1].trim() : "New Client";
-    
-    // Try to extract service/item details
-    let description = "Services";
-    let quantity = 1;
-    let unitPrice = 100;
-    
-    const hoursMatch = command.match(/(\d+)\s*hours?/i);
-    if (hoursMatch) {
-      quantity = parseInt(hoursMatch[1], 10);
-      description = "Consulting Hours";
-    }
-    
-    const priceMatch = command.match(/(\d+)(?:\.\d+)?\s*(?:€|EUR|euros?)?(?:\/|\s+per\s+)(?:hour|hr)/i);
-    if (priceMatch) {
-      unitPrice = parseFloat(priceMatch[1]);
-    }
-    
-    // Calculate totals
-    const itemTotal = quantity * unitPrice;
-    const tax = itemTotal * 0.24; // 24% VAT in Greece
-    
-    // Create invoice object
-    const invoice: Invoice = {
-      id: `INV-00${++invoiceCounter}`,
-      clientName,
-      items: [
-        {
-          id: `item-1`,
-          description,
-          quantity,
-          unitPrice,
-          total: itemTotal,
+          content: command,
         },
       ],
-      total: itemTotal,
-      tax,
-      grandTotal: itemTotal + tax,
-      date: new Date(),
-      status: "draft",
-    };
+    });
+
+    // For demo purposes, we'll just create a sample invoice
+    const invoiceId = `INV-${generateId(6)}`;
+    const itemTotal = 10 * 100; // quantity * unitPrice
     
-    return invoice;
+    return {
+      id: invoiceId,
+      number: `INV-${new Date().getFullYear()}-${generateId(3)}`,
+      date: new Date().toISOString(),
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      clientName: "Demo Client",
+      clientVat: "EL123456789",
+      clientAddress: "123 Demo Street, Athens",
+      items: [
+        {
+          description: "Professional Services",
+          quantity: 10,
+          unitPrice: 100,
+          amount: itemTotal,
+        },
+      ],
+      subtotal: itemTotal,
+      tax: itemTotal * 0.24,
+      total: itemTotal * 1.24,
+      status: "pending",
+    };
   } catch (error) {
     console.error("Error parsing invoice command:", error);
     return null;
@@ -134,34 +114,38 @@ async function parseInvoiceCommand(command: string): Promise<Invoice | null> {
 
 export async function GET(req: NextRequest) {
   try {
-    // Get query parameters for filtering
     const { searchParams } = new URL(req.url);
-    const clientName = searchParams.get("client");
+    const id = searchParams.get("id");
+    
+    // Return a specific invoice if ID is provided
+    if (id) {
+      const invoice = invoices.find(inv => inv.id === id);
+      
+      if (!invoice) {
+        return NextResponse.json(
+          { error: "Invoice not found" },
+          { status: 404 }
+        );
+      }
+      
+      return NextResponse.json(invoice);
+    }
+    
+    // Filter invoices if status is provided
     const status = searchParams.get("status");
     
-    let filteredInvoices = [...storedInvoices];
+    let filteredInvoices = [...invoices];
     
     // Apply filters if provided
-    if (clientName) {
-      filteredInvoices = filteredInvoices.filter(invoice => 
-        invoice.clientName.toLowerCase().includes(clientName.toLowerCase())
-      );
-    }
-    
     if (status) {
-      filteredInvoices = filteredInvoices.filter(invoice => 
-        invoice.status === status
-      );
+      filteredInvoices = filteredInvoices.filter(inv => inv.status === status);
     }
     
-    // Sort by date, newest first
-    filteredInvoices.sort((a, b) => b.date.getTime() - a.date.getTime());
-    
-    return NextResponse.json({ invoices: filteredInvoices });
+    return NextResponse.json(filteredInvoices);
   } catch (error) {
-    console.error("Error retrieving invoices:", error);
+    console.error("Error fetching invoices:", error);
     return NextResponse.json(
-      { error: "Failed to retrieve invoices" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -169,17 +153,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { command, invoice: manualInvoice } = await req.json();
+    const { command, invoice } = await req.json();
     
-    // There are two ways to create an invoice:
-    // 1. Via natural language command
-    // 2. Via structured invoice data
-    
-    let newInvoice: Invoice | null = null;
-    
+    // Handle natural language command
     if (command) {
-      // Parse the natural language command
-      newInvoice = await parseInvoiceCommand(command);
+      const newInvoice = await parseInvoiceCommand(command);
       
       if (!newInvoice) {
         return NextResponse.json(
@@ -187,56 +165,68 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-    } else if (manualInvoice) {
-      // Use the provided invoice data
-      newInvoice = {
-        ...manualInvoice,
-        id: `INV-00${++invoiceCounter}`,
-        date: new Date(),
-        status: "draft",
+      
+      // Add to our in-memory array
+      invoices.push(newInvoice);
+      
+      return NextResponse.json({ 
+        message: "Invoice created successfully", 
+        invoice: newInvoice 
+      });
+    }
+    
+    // Handle direct invoice submission
+    if (invoice) {
+      // Validate required fields
+      if (!invoice.clientName || !invoice.items || invoice.items.length === 0) {
+        return NextResponse.json(
+          { error: "Missing required fields" },
+          { status: 400 }
+        );
+      }
+      
+      // Generate ID if not provided
+      const newInvoice: Invoice = {
+        ...invoice,
+        id: invoice.id || `INV-${generateId(6)}`,
+        number: invoice.number || `INV-${new Date().getFullYear()}-${generateId(3)}`,
+        date: invoice.date || new Date().toISOString(),
+        dueDate: invoice.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        status: invoice.status || "pending",
       };
       
-      // Calculate totals if not provided
-      if (newInvoice && !newInvoice.total) {
-        newInvoice.total = newInvoice.items.reduce((sum, item) => sum + item.total, 0);
+      // Calculate subtotal if not provided
+      if (!newInvoice.subtotal) {
+        newInvoice.subtotal = newInvoice.items.reduce((sum, item) => sum + item.amount, 0);
       }
       
-      if (newInvoice && !newInvoice.tax) {
-        newInvoice.tax = newInvoice.total * 0.24; // 24% VAT in Greece
+      // Calculate tax if not provided
+      if (!newInvoice.tax) {
+        newInvoice.tax = newInvoice.subtotal * 0.24; // 24% VAT in Greece
       }
       
-      if (newInvoice && !newInvoice.grandTotal) {
-        newInvoice.grandTotal = newInvoice.total + newInvoice.tax;
+      // Calculate total if not provided
+      if (!newInvoice.total) {
+        newInvoice.total = newInvoice.subtotal + newInvoice.tax;
       }
-    } else {
-      return NextResponse.json(
-        { error: "Either command or invoice data must be provided" },
-        { status: 400 }
-      );
+      
+      // Add to our in-memory array
+      invoices.push(newInvoice);
+      
+      return NextResponse.json({ 
+        message: "Invoice created successfully", 
+        invoice: newInvoice 
+      });
     }
     
-    // Ensure newInvoice is not null before proceeding
-    if (!newInvoice) {
-      return NextResponse.json(
-        { error: "Failed to create invoice" },
-        { status: 500 }
-      );
-    }
-    
-    // In a real implementation, we would:
-    // 1. Save the invoice to a database
-    // 2. Submit it to the union.gr API
-    // For now, we'll just add it to our in-memory array
-    storedInvoices.push(newInvoice);
-    
-    return NextResponse.json({ 
-      message: `Invoice ${newInvoice.id} created for ${newInvoice.clientName}`,
-      invoice: newInvoice 
-    });
+    return NextResponse.json(
+      { error: "No command or invoice data provided" },
+      { status: 400 }
+    );
   } catch (error) {
     console.error("Error creating invoice:", error);
     return NextResponse.json(
-      { error: "Failed to create invoice" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
