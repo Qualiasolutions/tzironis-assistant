@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
     const knowledgeBase = new KnowledgeBase({
       pineconeApiKey,
       pineconeIndex,
-      namespace: 'tzironis-kb',
       openaiApiKey: openAIApiKey,
+      namespace: 'tzironis-kb',
     });
 
     // Search the knowledge base

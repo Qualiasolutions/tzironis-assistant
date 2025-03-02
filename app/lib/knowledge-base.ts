@@ -38,8 +38,12 @@ export class KnowledgeBase {
   }) {
     this.pineconeClient = new Pinecone({
       apiKey: pineconeApiKey,
+      environment: "gcp-starter", // Add your Pinecone environment
     });
-    this.embeddings = new OpenAIEmbeddings({ apiKey: openaiApiKey });
+    this.embeddings = new OpenAIEmbeddings({
+      openAIApiKey: openaiApiKey,
+      modelName: "text-embedding-3-small",
+    });
     this.namespace = namespace;
     this.index = pineconeIndex;
     this.maxPages = maxPages;
