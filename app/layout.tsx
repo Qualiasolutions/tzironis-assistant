@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "./lib/LanguageContext";
 import { AuthProvider } from "./providers";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-geist" });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
   title: "Qualia AI | Intelligent Business Assistant for Tzironis",
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${geist.variable} ${geistMono.variable} bg-white text-gray-900 min-h-screen`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} bg-white text-gray-900 min-h-screen`}>
         <AuthProvider>
           <LanguageProvider>
             {children}
