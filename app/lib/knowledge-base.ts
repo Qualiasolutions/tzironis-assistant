@@ -38,7 +38,6 @@ export class KnowledgeBase {
   }) {
     this.pineconeClient = new Pinecone({
       apiKey: pineconeApiKey,
-      environment: "gcp-starter", // Add your Pinecone environment
     });
     this.embeddings = new OpenAIEmbeddings({
       openAIApiKey: openaiApiKey,
