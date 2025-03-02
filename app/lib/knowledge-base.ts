@@ -1,4 +1,4 @@
-import { PineconeClient } from "@pinecone-database/pinecone";
+import { Pinecone } from "@pinecone-database/pinecone";
 import { Document } from "langchain/document";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
@@ -12,7 +12,7 @@ interface CrawlStats {
 }
 
 export class KnowledgeBase {
-  private pineconeClient: PineconeClient;
+  private pineconeClient: Pinecone;
   private embeddings: OpenAIEmbeddings;
   private namespace: string;
   private index: string;
@@ -38,7 +38,10 @@ export class KnowledgeBase {
     maxPages?: number;
     maxDepth?: number;
   }) {
-    this.pineconeClient = new PineconeClient();
+    this.pineconeClient = new Pinecone({
+      apiKey: pineconeApiKey,
+      environment: pineconeEnvironment,
+    });
     this.embeddings = new OpenAIEmbeddings({ openAIApiKey: openaiApiKey });
     this.namespace = namespace;
     this.index = pineconeIndex;
@@ -46,12 +49,6 @@ export class KnowledgeBase {
     this.maxDepth = maxDepth;
     this.visitedUrls = new Set<string>();
     this.stats = { pagesProcessed: 0, chunksStored: 0 };
-
-    // Initialize Pinecone client
-    this.pineconeClient.init({
-      apiKey: pineconeApiKey,
-      environment: pineconeEnvironment,
-    });
   }
 
   /**
@@ -254,7 +251,7 @@ export class KnowledgeBase {
     
     try {
       // Initialize the Pinecone index
-      const pineconeIndex = await this.pineconeClient.Index(this.index);
+      const pineconeIndex = this.pineconeClient.index(this.index);
       
       // Store documents in Pinecone
       await PineconeStore.fromDocuments(chunks, this.embeddings, {
@@ -273,7 +270,7 @@ export class KnowledgeBase {
   async search(query: string, limit: number = 5): Promise<any[]> {
     try {
       // Initialize the Pinecone index
-      const pineconeIndex = await this.pineconeClient.Index(this.index);
+      const pineconeIndex = this.pineconeClient.index(this.index);
       
       // Create vector store
       const vectorStore = await PineconeStore.fromExistingIndex(

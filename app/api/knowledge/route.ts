@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PineconeClient } from "@pinecone-database/pinecone";
+import { Pinecone } from "@pinecone-database/pinecone";
 import MistralClient from "@mistralai/mistralai";
 
 // Initialize the Mistral AI client for embeddings
