@@ -33,12 +33,12 @@ export default function Features() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
           Tzironis Business Suite
         </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+        <p className="text-xl text-gray-700 dark:text-gray-200 max-w-3xl mx-auto">
           Access powerful business tools powered by AI to streamline your operations.
         </p>
       </div>
@@ -46,7 +46,7 @@ export default function Features() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {features.map((feature) => (
           <Link href={feature.href} key={feature.id}>
-            <div className="feature-card group hover-card-effect">
+            <div className="feature-card group">
               <div className="mb-4 flex justify-center">
                 <div className="p-3 rounded-full bg-primary/10 text-primary">
                   {feature.icon}
@@ -55,7 +55,7 @@ export default function Features() {
               <h3 className="text-xl font-semibold text-center mb-3 text-gray-900 dark:text-white group-hover:text-primary transition-colors">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 dark:text-gray-300 text-center">
+              <p className="text-gray-700 dark:text-gray-200 text-center">
                 {feature.description}
               </p>
             </div>
@@ -64,7 +64,7 @@ export default function Features() {
       </div>
       
       <div className="mt-16 text-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center">
+        <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center justify-center">
           <Bot className="h-4 w-4 mr-2 text-primary" />
           Powered by QUALIA AI
         </p>

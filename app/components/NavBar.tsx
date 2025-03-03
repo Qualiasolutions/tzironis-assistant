@@ -79,7 +79,7 @@ export default function NavBar() {
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-      scrolled ? "bg-white shadow-md dark:bg-gray-900" : "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
+      scrolled ? "bg-white shadow-md dark:bg-gray-900" : "bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm"
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -87,7 +87,16 @@ export default function NavBar() {
           <div className="flex items-center">
             <Link href="/" onClick={closeMenus}>
               <div className="flex items-center">
-                <span className="text-blue-600 dark:text-blue-400 text-2xl font-bold">Tzironis</span>
+                <div className="flex items-center justify-center h-9 w-9 bg-opacity-10 bg-primary dark:bg-opacity-20 dark:bg-primary rounded-full overflow-hidden mr-2">
+                  <Image 
+                    src="/icons/logo.png" 
+                    alt="Tzironis Logo" 
+                    width={32} 
+                    height={32}
+                    className="object-contain"
+                  />
+                </div>
+                <span className="text-primary text-xl font-bold">Tzironis</span>
               </div>
             </Link>
           </div>
@@ -117,28 +126,17 @@ export default function NavBar() {
           <div className="flex items-center space-x-2">
             <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
             
-            {/* Logo in the top right */}
-            <div className="hidden md:block">
-              <Image 
-                src="/icons/logo.png" 
-                alt="Tzironis Logo" 
-                width={40} 
-                height={40} 
-                className="rounded-md"
-              />
-            </div>
-            
-            {/* Profile dropdown button */}
+            {/* Profile/login section */}
             {session ? (
               <div className="relative">
                 <button
                   onClick={toggleProfile}
-                  className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition px-3 py-2 rounded-md"
+                  className="flex items-center space-x-1 text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition px-3 py-2 rounded-md"
                 >
                   <img 
-                    src={session.user?.image || "/images/default-avatar.png"} 
+                    src={session.user?.image || "/icons/logo.png"} 
                     alt={session.user?.name || "User"} 
-                    className="h-8 w-8 rounded-full border-2 border-blue-500"
+                    className="h-8 w-8 rounded-full border-2 border-primary"
                   />
                   <ChevronDown size={16} />
                 </button>
@@ -148,16 +146,18 @@ export default function NavBar() {
                 )}
               </div>
             ) : (
-              <NavLink href="/auth/signin" active={false} onClick={closeMenus}>
-                Sign In
-              </NavLink>
+              <div className="flex items-center space-x-2">
+                <NavLink href="/auth/signin" active={false} onClick={closeMenus}>
+                  Sign In
+                </NavLink>
+              </div>
             )}
             
             {/* Mobile menu button */}
             <div className="md:hidden flex">
               <button
                 onClick={toggleMenu}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none"
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary focus:outline-none"
               >
                 <span className="sr-only">Open main menu</span>
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
