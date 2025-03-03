@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { MistralEmbeddings } from "./mistral-embeddings";
 import { Embeddings } from "@langchain/core/embeddings";
+import { parse as parseCSV } from 'csv-parse/sync'; // Import CSV parser
 
 interface CrawlStats {
   pagesProcessed: number;
@@ -405,6 +406,45 @@ export class KnowledgeBase {
     fileType: string
   ): Promise<FileProcessResult> {
     try {
+      let processedContent = content;
+      
+      // Special handling for CSV files
+      if (filename.endsWith('.csv')) {
+        try {
+          // Parse CSV content
+          const records = parseCSV(content, {
+            columns: true, // Use first row as column names
+            skip_empty_lines: true,
+            trim: true,
+          });
+          
+          if (records && records.length > 0) {
+            // Convert CSV records to a more readable format
+            processedContent = records.map((record: any, index: number) => {
+              // Create a string representation of each row
+              let rowContent = `Item ${index + 1}:\n`;
+              
+              // Add each column as a key-value pair
+              for (const [key, value] of Object.entries(record)) {
+                if (value && String(value).trim()) {
+                  // If the value contains HTML, try to extract plain text
+                  const cleanValue = String(value).includes('<') && String(value).includes('>')
+                    ? this.extractTextFromHtml(String(value))
+                    : value;
+                    
+                  rowContent += `${key}: ${cleanValue}\n`;
+                }
+              }
+              
+              return rowContent;
+            }).join('\n\n');
+          }
+        } catch (csvError) {
+          console.error(`Error parsing CSV file ${filename}:`, csvError);
+          // Fall back to treating the file as plain text
+        }
+      }
+      
       // Create a text splitter
       const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1000,
@@ -412,7 +452,7 @@ export class KnowledgeBase {
       });
       
       // Split the text into chunks
-      const rawChunks = await splitter.createDocuments([content]);
+      const rawChunks = await splitter.createDocuments([processedContent]);
       
       // Add metadata to chunks
       const chunks = rawChunks.map((chunk) => 
@@ -442,6 +482,22 @@ export class KnowledgeBase {
         filename,
         chunksStored: 0,
       };
+    }
+  }
+
+  /**
+   * Extract plain text from HTML content
+   */
+  private extractTextFromHtml(html: string): string {
+    try {
+      const $ = cheerio.load(html);
+      // Remove script and style tags
+      $('script, style').remove();
+      // Get text and preserve some structure
+      return $('body').text().replace(/\s+/g, ' ').trim();
+    } catch (error) {
+      // On error, return the original HTML string
+      return html;
     }
   }
 
