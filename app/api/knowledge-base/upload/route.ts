@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { KnowledgeBase } from "@/app/lib/knowledge-base";
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
+// Update to new Next.js route segment config syntax
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs';
+export const bodyParser = {
+  sizeLimit: '10mb',
 };
 
 export async function POST(req: NextRequest) {
