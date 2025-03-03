@@ -1,8 +1,8 @@
 services:
   - type: web
-    name: qualia-assistant
+    name: tzironis-assistant
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: chmod +x build.sh && ./build.sh
     startCommand: npm start
     envVars:
       - key: NODE_ENV
