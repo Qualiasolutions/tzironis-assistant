@@ -18,11 +18,13 @@ export default function FeaturesLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
-      <main className="flex-grow">{children}</main>
-      <footer className="border-t bg-white/90 backdrop-blur-sm py-6">
+      <div className="mt-16 flex-grow">
+        {children}
+      </div>
+      <footer className="border-t bg-white/90 backdrop-blur-sm py-6 dark:bg-gray-900/90">
         <div className="container px-4 sm:px-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-center text-sm text-muted-foreground md:text-left">
+            <p className="text-center text-sm text-black dark:text-white md:text-left">
               &copy; {new Date().getFullYear()} Tzironis. All rights reserved.
             </p>
             <div className="flex items-center space-x-4">
@@ -30,7 +32,7 @@ export default function FeaturesLayout({
                 href="https://tzironis.gr/privacy" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                className="text-sm text-black dark:text-white hover:text-primary transition-colors"
               >
                 Privacy Policy
               </a>
@@ -38,7 +40,7 @@ export default function FeaturesLayout({
                 href="https://tzironis.gr/terms" 
                 target="_blank"
                 rel="noopener noreferrer" 
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                className="text-sm text-black dark:text-white hover:text-primary transition-colors"
               >
                 Terms of Service
               </a>

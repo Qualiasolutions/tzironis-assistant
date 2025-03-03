@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, FileText, Send, Plus, Check, AlertCircle } from "lucide-react";
+import { FileText, Send, Plus, Check, AlertCircle } from "lucide-react";
 import { Invoice } from "@/app/types";
 import { formatDate, formatCurrency } from "@/app/lib/utils";
 import axios from "axios";
@@ -208,24 +208,14 @@ export default function InvoiceAutomationPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-white px-4">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="mr-2 rounded-full p-1 hover:bg-gray-100">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <FileText className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold text-primary">Invoice Automation</h1>
-        </div>
-      </header>
-
-      <main className="flex-1 p-4 sm:p-6">
+    <div className="flex-1">
+      <main className="p-4 sm:p-6">
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 text-center">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className="text-2xl font-bold tracking-tight text-black dark:text-white">
               Automate Your Invoicing
             </h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-black dark:text-white">
               Create invoices on union.gr with simple natural language commands
             </p>
           </div>
@@ -236,139 +226,119 @@ export default function InvoiceAutomationPage() {
             </div>
           )}
 
-          <div className="mb-8 rounded-lg border bg-white p-6 shadow-sm">
-            <h3 className="mb-4 text-lg font-medium">Create New Invoice</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="e.g., Create an invoice for Acme Corp for 3 consulting hours at €80/hour plus VAT"
-                  className="w-full rounded-md border border-input bg-background py-2 px-4 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  value={command}
-                  onChange={(e) => setCommand(e.target.value)}
-                  disabled={isProcessing}
-                />
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                  disabled={isProcessing || !command.trim()}
-                >
-                  {isProcessing ? (
-                    <>Processing...</>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-4 w-4" />
-                      Process Command
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-
-            {status !== "idle" && (
-              <div
-                className={`mt-4 rounded-md p-3 ${
-                  status === "success"
-                    ? "bg-green-50 text-green-800"
-                    : "bg-red-50 text-red-800"
-                }`}
+          <div className="mb-8 rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-800">
+            <h3 className="mb-2 text-lg font-medium text-black dark:text-white">Create Invoice</h3>
+            <div className="relative">
+              <textarea
+                value={command}
+                onChange={(e) => setCommand(e.target.value)}
+                placeholder="Example: Create an invoice for Acme Corp for website design services for 1500 euros due in 30 days"
+                className="min-h-[100px] w-full rounded-md border border-gray-300 p-3 text-black dark:text-white dark:border-gray-700 dark:bg-gray-900"
+                disabled={isProcessing}
+              />
+              <button
+                onClick={handleSubmit}
+                disabled={!command.trim() || isProcessing}
+                className="mt-2 inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 font-medium text-white hover:bg-primary/90 disabled:opacity-50 sm:mt-0 sm:w-auto"
               >
-                <div className="flex items-center">
-                  {status === "success" ? (
-                    <Check className="mr-2 h-4 w-4" />
-                  ) : (
-                    <AlertCircle className="mr-2 h-4 w-4" />
-                  )}
-                  <p className="text-sm">{statusMessage}</p>
+                {isProcessing ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Process
+                  </>
+                )}
+              </button>
+            </div>
+
+            {status === "success" && (
+              <div className="mt-4 rounded-md bg-green-50 p-3 text-black dark:bg-green-900/30">
+                <div className="flex">
+                  <Check className="mr-2 h-5 w-5 text-green-600 dark:text-green-400" />
+                  <p>{statusMessage}</p>
+                </div>
+              </div>
+            )}
+
+            {status === "error" && (
+              <div className="mt-4 rounded-md bg-red-50 p-3 text-black dark:bg-red-900/30">
+                <div className="flex">
+                  <AlertCircle className="mr-2 h-5 w-5 text-red-600 dark:text-red-400" />
+                  <p>{statusMessage}</p>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="rounded-lg border bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b p-4">
-              <h3 className="font-medium">Recent Invoices</h3>
-              <Link
-                href="#"
-                className="inline-flex items-center text-sm text-primary hover:underline"
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                New Invoice
-              </Link>
-            </div>
-            <div className="overflow-x-auto">
-              {isLoading ? (
-                <div className="p-8 text-center">
-                  <div className="inline-flex items-center justify-center">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-                    <span className="ml-2">Loading invoices...</span>
-                  </div>
+          <div className="overflow-x-auto">
+            <h3 className="mb-4 text-lg font-medium text-black dark:text-white">Recent Invoices</h3>
+            {isLoading ? (
+              <div className="p-8 text-center">
+                <div className="inline-flex items-center justify-center">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                  <span className="ml-2 text-black dark:text-white">Loading invoices...</span>
                 </div>
-              ) : (
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="px-4 py-3 text-left text-sm font-medium">
-                        Invoice #
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">
-                        Client
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">
-                        Date
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">
-                        Amount
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invoices.length > 0 ? (
-                      invoices.map((invoice) => (
-                        <tr key={invoice.id} className="border-b">
-                          <td className="px-4 py-3 text-sm">{invoice.id}</td>
-                          <td className="px-4 py-3 text-sm">{invoice.clientName}</td>
-                          <td className="px-4 py-3 text-sm">
-                            {formatDate(invoice.date)}
-                          </td>
-                          <td className="px-4 py-3 text-sm">
-                            {formatCurrency(invoice.grandTotal)}
-                          </td>
-                          <td className="px-4 py-3 text-sm">
-                            <span
-                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                invoice.status === "paid"
-                                  ? "bg-green-100 text-green-800"
-                                  : invoice.status === "sent"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
-                            >
-                              {invoice.status.charAt(0).toUpperCase() +
-                                invoice.status.slice(1)}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="px-4 py-8 text-center text-muted-foreground"
-                        >
-                          No invoices found. Create your first invoice using the form above.
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-black dark:text-white">
+                      Invoice #
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-black dark:text-white">
+                      Client
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-black dark:text-white">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-black dark:text-white">
+                      Amount
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-black dark:text-white">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.length > 0 ? (
+                    invoices.map((invoice) => (
+                      <tr key={invoice.id} className="border-b">
+                        <td className="px-4 py-3 text-sm text-black dark:text-white">{invoice.id}</td>
+                        <td className="px-4 py-3 text-sm text-black dark:text-white">{invoice.clientName}</td>
+                        <td className="px-4 py-3 text-sm text-black dark:text-white">
+                          {formatDate(invoice.date)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-black dark:text-white">
+                          {formatCurrency(invoice.grandTotal)}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-black`}
+                          >
+                            {invoice.status.charAt(0).toUpperCase() +
+                              invoice.status.slice(1)}
+                          </span>
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
-            </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-4 py-8 text-center text-black dark:text-white"
+                      >
+                        No invoices found. Create your first invoice using the form above.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </main>
