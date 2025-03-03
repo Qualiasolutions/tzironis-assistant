@@ -3,26 +3,20 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { 
-  Brain, 
   Menu, 
-  X, 
-  MessageSquare, 
-  Database, 
-  FileText, 
-  Users, 
-  LogOut, 
-  LogIn, 
-  User as UserIcon,
-  Moon,
-  Sun,
+  X,
   ChevronDown,
 } from "lucide-react";
 import { useLanguage } from "@/app/lib/LanguageContext";
+import ThemeToggle from "./navigation/ThemeToggle";
+import ProfileMenu from "./navigation/ProfileMenu";
+import MobileMenu from "./navigation/MobileMenu";
+import NavLink from "./navigation/NavLink";
 
 export default function NavBar() {
-  const { t, toggleLanguage, language } = useLanguage();
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -50,43 +44,31 @@ export default function NavBar() {
         setScrolled(false);
       }
     };
-
+    
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
+    setIsDarkMode(!isDarkMode);
     
-    localStorage.setItem("darkMode", String(newDarkMode));
-    
-    if (newDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
+    if (isDarkMode) {
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("darkMode", "false");
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("darkMode", "true");
     }
-  };
-
-  const handleSignIn = () => {
-    signIn();
-    setIsMenuOpen(false);
-  };
-
-  const handleSignOut = () => {
-    signOut();
-    setIsProfileOpen(false);
-    setIsMenuOpen(false);
   };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    setIsProfileOpen(false);
+    if (isProfileOpen) setIsProfileOpen(false);
   };
 
   const toggleProfile = () => {
     setIsProfileOpen(!isProfileOpen);
-    setIsMenuOpen(false);
+    if (isMenuOpen) setIsMenuOpen(false);
   };
 
   const closeMenus = () => {
@@ -95,126 +77,82 @@ export default function NavBar() {
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white/90 dark:bg-slate-900/90 shadow-md backdrop-blur-sm" : "bg-transparent"
-      }`}
-    >
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      scrolled ? "bg-white shadow-md dark:bg-gray-900" : "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex items-center justify-between h-16">
           {/* Logo and brand */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center" onClick={closeMenus} aria-label="Home">
-              <Brain className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-semibold text-slate-900 dark:text-white">QUALIA</span>
+            <Link href="/" onClick={closeMenus}>
+              <div className="flex items-center">
+                <span className="text-blue-600 dark:text-blue-400 text-2xl font-bold">Tzironis</span>
+              </div>
             </Link>
           </div>
 
-          {/* Desktop navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
-            <NavLink href="/chat" active={pathname === "/chat"} onClick={closeMenus}>
-              <MessageSquare className="h-5 w-5 mr-1" />
-              <span>{t("navChat")}</span>
-            </NavLink>
-            <NavLink href="/knowledge-base" active={pathname === "/knowledge-base"} onClick={closeMenus}>
-              <Database className="h-5 w-5 mr-1" />
-              <span>{t("navKnowledgeBase")}</span>
-            </NavLink>
-            <NavLink href="/invoice-automation" active={pathname === "/invoice-automation"} onClick={closeMenus}>
-              <FileText className="h-5 w-5 mr-1" />
-              <span>{t("navInvoiceAutomation")}</span>
-            </NavLink>
-            <NavLink href="/lead-generation" active={pathname === "/lead-generation"} onClick={closeMenus}>
-              <Users className="h-5 w-5 mr-1" />
-              <span>{t("navLeadGeneration")}</span>
-            </NavLink>
+          {/* Desktop navigation links */}
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-center space-x-4">
+              <NavLink href="/" active={pathname === "/"} onClick={closeMenus}>
+                Home
+              </NavLink>
+              
+              <NavLink href="/chat" active={pathname === "/chat"} onClick={closeMenus}>
+                {t("navChat")}
+              </NavLink>
+              
+              <NavLink href="/knowledge-base" active={pathname.includes("/knowledge-base")} onClick={closeMenus}>
+                {t("navKnowledgeBase")}
+              </NavLink>
+              
+              <NavLink href="/invoice-automation" active={pathname.includes("/invoice-automation")} onClick={closeMenus}>
+                {t("navInvoiceAutomation")}
+              </NavLink>
+              
+              <NavLink href="/lead-generation" active={pathname.includes("/lead-generation")} onClick={closeMenus}>
+                {t("navLeadGeneration")}
+              </NavLink>
+            </div>
           </div>
 
-          {/* Right side controls */}
+          {/* Right side buttons and controls */}
           <div className="flex items-center space-x-2">
-            {/* Theme toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-full text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              aria-label={isDarkMode ? "Light Mode" : "Dark Mode"}
-            >
-              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-
-            {/* Language toggle */}
-            <button
-              onClick={toggleLanguage}
-              className="p-2 rounded-full text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              aria-label="Switch Language"
-            >
-              {language === "en" ? "EL" : "EN"}
-            </button>
-
-            {/* Profile/Auth */}
-            <div className="relative">
-              <button
-                onClick={toggleProfile}
-                className="flex items-center p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                aria-expanded={isProfileOpen}
-                aria-haspopup="true"
-              >
-                {session ? (
-                  <div className="flex items-center">
-                    {session.user?.image ? (
-                      <img
-                        src={session.user.image}
-                        alt={session.user.name || "Profile"}
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <UserIcon className="h-5 w-5 text-slate-700 dark:text-slate-300" />
-                    )}
-                    <ChevronDown className="ml-1 h-4 w-4" />
-                  </div>
-                ) : (
-                  <UserIcon className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+            <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+            
+            {/* Profile dropdown button */}
+            {session ? (
+              <div className="relative">
+                <button
+                  onClick={toggleProfile}
+                  className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition px-3 py-2 rounded-md"
+                >
+                  <img 
+                    src={session.user?.image || "/images/default-avatar.png"} 
+                    alt={session.user?.name || "User"} 
+                    className="h-8 w-8 rounded-full border-2 border-blue-500"
+                  />
+                  <ChevronDown size={16} />
+                </button>
+                
+                {isProfileOpen && (
+                  <ProfileMenu session={session} closeMenu={closeMenus} />
                 )}
-              </button>
-
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 py-2 bg-white dark:bg-slate-800 rounded-md shadow-lg z-50 ring-1 ring-black ring-opacity-5">
-                  {session ? (
-                    <>
-                      <div className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 border-b dark:border-slate-700">
-                        <p className="font-medium truncate">{session.user?.name}</p>
-                        <p className="text-xs truncate">{session.user?.email}</p>
-                      </div>
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center"
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        {t("signOut")}
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={handleSignIn}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center"
-                    >
-                      <LogIn className="mr-2 h-4 w-4" />
-                      {t("signIn")}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
+              </div>
+            ) : (
+              <NavLink href="/auth/signin" active={false} onClick={closeMenus}>
+                Sign In
+              </NavLink>
+            )}
+            
             {/* Mobile menu button */}
-            <div className="md:hidden">
+            <div className="md:hidden flex">
               <button
                 onClick={toggleMenu}
-                className="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                aria-controls="mobile-menu"
-                aria-expanded={isMenuOpen}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none"
               >
                 <span className="sr-only">Open main menu</span>
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
           </div>
@@ -223,66 +161,8 @@ export default function NavBar() {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-900 shadow-lg" id="mobile-menu">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <MobileNavLink href="/chat" active={pathname === "/chat"} onClick={closeMenus}>
-              <MessageSquare className="h-5 w-5 mr-2" />
-              {t("navChat")}
-            </MobileNavLink>
-            <MobileNavLink href="/knowledge-base" active={pathname === "/knowledge-base"} onClick={closeMenus}>
-              <Database className="h-5 w-5 mr-2" />
-              {t("navKnowledgeBase")}
-            </MobileNavLink>
-            <MobileNavLink href="/invoice-automation" active={pathname === "/invoice-automation"} onClick={closeMenus}>
-              <FileText className="h-5 w-5 mr-2" />
-              {t("navInvoiceAutomation")}
-            </MobileNavLink>
-            <MobileNavLink href="/lead-generation" active={pathname === "/lead-generation"} onClick={closeMenus}>
-              <Users className="h-5 w-5 mr-2" />
-              {t("navLeadGeneration")}
-            </MobileNavLink>
-          </div>
-        </div>
+        <MobileMenu pathname={pathname} closeMenu={closeMenus} />
       )}
     </nav>
-  );
-}
-
-interface NavLinkProps {
-  href: string;
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}
-
-function NavLink({ href, active, onClick, children }: NavLinkProps) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={`nav-link flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-        active
-          ? "text-primary dark:text-primary-hover bg-primary/5 dark:bg-primary/10"
-          : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-      }`}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function MobileNavLink({ href, active, onClick, children }: NavLinkProps) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={`flex items-center w-full px-3 py-3 rounded-md text-base font-medium ${
-        active
-          ? "text-primary dark:text-primary-hover bg-primary/5 dark:bg-primary/10"
-          : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-      }`}
-    >
-      {children}
-    </Link>
   );
 } 

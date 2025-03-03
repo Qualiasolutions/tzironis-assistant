@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { KnowledgeBase } from "@/app/lib/knowledge-base";
 
-// Update to new Next.js route segment config syntax
+// Next.js App Router configuration
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const runtime = 'nodejs';
-export const bodyParser = {
-  sizeLimit: '10mb',
-};
 
 export async function POST(req: NextRequest) {
   try {
