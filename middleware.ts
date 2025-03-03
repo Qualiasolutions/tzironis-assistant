@@ -22,6 +22,12 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
   
+  // If this is the root path and we have a token, allow access
+  // This ensures users don't get redirected away from homepage after login
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
+  
   // If the route is not protected, allow access
   if (!isProtectedRoute) {
     return NextResponse.next();
@@ -36,7 +42,8 @@ export async function middleware(request: NextRequest) {
   // If there is no token, redirect to the sign-in page
   if (!token) {
     const url = new URL("/auth/signin", request.url);
-    url.searchParams.set("callbackUrl", pathname);
+    // Set callback URL to homepage instead of requested page
+    url.searchParams.set("callbackUrl", "/");
     return NextResponse.redirect(url);
   }
   

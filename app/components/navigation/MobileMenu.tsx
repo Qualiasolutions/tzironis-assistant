@@ -18,10 +18,6 @@ export default function MobileMenu({ pathname, closeMenu }: MobileMenuProps) {
         <MobileNavLink href="/" active={pathname === "/"} onClick={closeMenu}>
           Home
         </MobileNavLink>
-        <MobileNavLink href="/chat" active={pathname === "/chat"} onClick={closeMenu}>
-          <MessageSquare className="h-5 w-5 mr-2" />
-          {t("navChat")}
-        </MobileNavLink>
         <MobileNavLink href="/knowledge-base" active={pathname.includes("/knowledge-base")} onClick={closeMenu}>
           <Database className="h-5 w-5 mr-2" />
           {t("navKnowledgeBase")}

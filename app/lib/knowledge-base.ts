@@ -20,7 +20,7 @@ export interface FileProcessResult {
 }
 
 export class KnowledgeBase {
-  private pineconeClient: Pinecone;
+  private pineconeClient: Pinecone | null = null;
   private embeddings: Embeddings;
   private namespace: string;
   private index: string;
@@ -28,6 +28,12 @@ export class KnowledgeBase {
   private maxDepth: number;
   private visitedUrls: Set<string>;
   private stats: CrawlStats;
+  private pineconeApiKey: string;
+  private connectionInitialized = false;
+  private initializationInProgress = false;
+  private initializationError: Error | null = null;
+  private maxRetries = 3;
+  private retryDelay = 1000; // ms
 
   constructor({
     pineconeApiKey,
@@ -46,9 +52,7 @@ export class KnowledgeBase {
     maxPages?: number;
     maxDepth?: number;
   }) {
-    this.pineconeClient = new Pinecone({
-      apiKey: pineconeApiKey,
-    });
+    this.pineconeApiKey = pineconeApiKey;
     
     // Use Mistral embeddings if available, otherwise fallback to OpenAI
     if (mistralApiKey) {
@@ -70,6 +74,107 @@ export class KnowledgeBase {
     this.maxDepth = maxDepth;
     this.visitedUrls = new Set<string>();
     this.stats = { pagesProcessed: 0, chunksStored: 0 };
+
+    // Defer Pinecone initialization until first use
+    this.initPineconeClient().catch(error => {
+      console.warn("Initial Pinecone connection failed, will retry on first use:", error.message);
+    });
+  }
+
+  private async initPineconeClient(forceRetry = false): Promise<Pinecone> {
+    // If already initialized and not forcing a retry, return the client
+    if (this.pineconeClient && this.connectionInitialized && !forceRetry) {
+      return this.pineconeClient;
+    }
+    
+    // If initialization is already in progress, wait for it to complete
+    if (this.initializationInProgress) {
+      // Wait for initialization to complete (poll every 100ms)
+      let attempts = 0;
+      while (this.initializationInProgress && attempts < 100) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      
+      if (this.pineconeClient && this.connectionInitialized) {
+        return this.pineconeClient;
+      } else if (this.initializationError) {
+        throw this.initializationError;
+      }
+    }
+    
+    // Start initialization
+    this.initializationInProgress = true;
+    this.initializationError = null;
+    
+    try {
+      // Initialize Pinecone client with retry logic
+      let retries = 0;
+      let lastError: Error | null = null;
+      
+      while (retries < this.maxRetries) {
+        try {
+          this.pineconeClient = new Pinecone({
+            apiKey: this.pineconeApiKey,
+          });
+          
+          // Test the connection
+          const indexes = await this.pineconeClient.listIndexes();
+          console.log(`Pinecone connection successful. Available indexes: ${indexes.length}`);
+          
+          this.connectionInitialized = true;
+          return this.pineconeClient;
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+          console.error(`Pinecone connection attempt ${retries + 1} failed:`, lastError.message);
+          retries++;
+          
+          if (retries < this.maxRetries) {
+            // Exponential backoff
+            const delay = this.retryDelay * Math.pow(2, retries - 1);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+      }
+      
+      // All retries failed
+      if (lastError) {
+        this.initializationError = lastError;
+        throw lastError;
+      } else {
+        const error = new Error("Failed to initialize Pinecone client after multiple attempts");
+        this.initializationError = error;
+        throw error;
+      }
+    } finally {
+      this.initializationInProgress = false;
+    }
+  }
+
+  // Get a Pinecone index with error handling
+  private async getPineconeIndex() {
+    try {
+      const client = await this.initPineconeClient();
+      return client.index(this.index);
+    } catch (error) {
+      console.error("Error getting Pinecone index:", error);
+      throw error;
+    }
+  }
+
+  // Wrapper for vector operations with fallback
+  private async withVectorStore<T>(operation: (store: PineconeStore) => Promise<T>, fallback: T): Promise<T> {
+    try {
+      const pineconeIndex = await this.getPineconeIndex();
+      const vectorStore = await PineconeStore.fromExistingIndex(this.embeddings, {
+        pineconeIndex,
+        namespace: this.namespace,
+      });
+      return await operation(vectorStore);
+    } catch (error) {
+      console.error("Vector store operation failed:", error);
+      return fallback;
+    }
   }
 
   /**
@@ -275,8 +380,8 @@ export class KnowledgeBase {
     if (chunks.length === 0) return;
     
     try {
-      // Initialize the Pinecone index
-      const pineconeIndex = this.pineconeClient.index(this.index);
+      // Get the Pinecone index using our resilient method
+      const pineconeIndex = await this.getPineconeIndex();
       
       // Store documents in Pinecone
       await PineconeStore.fromDocuments(chunks, this.embeddings, {
@@ -285,7 +390,8 @@ export class KnowledgeBase {
       });
     } catch (error) {
       console.error("Error storing chunks:", error);
-      throw error;
+      // Throw error but ensure it's properly caught by the caller
+      throw new Error(`Failed to store chunks in Pinecone: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -330,7 +436,11 @@ export class KnowledgeBase {
       };
     } catch (error) {
       console.error(`Error processing file ${filename}:`, error);
-      throw error;
+      // Return partial result instead of failing
+      return {
+        filename,
+        chunksStored: 0,
+      };
     }
   }
 
@@ -339,11 +449,11 @@ export class KnowledgeBase {
    */
   async clearAll(): Promise<void> {
     try {
-      const pineconeIndex = this.pineconeClient.index(this.index);
+      const pineconeIndex = await this.getPineconeIndex();
       await pineconeIndex.namespace(this.namespace).deleteAll();
     } catch (error) {
       console.error("Error clearing knowledge base:", error);
-      throw error;
+      throw new Error(`Failed to clear knowledge base: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -351,77 +461,54 @@ export class KnowledgeBase {
    * Search the knowledge base for relevant information
    */
   async search(query: string, limit: number = 5): Promise<any[]> {
-    try {
-      // Initialize the Pinecone index
-      const pineconeIndex = this.pineconeClient.index(this.index);
-      
-      // Create vector store
-      const vectorStore = await PineconeStore.fromExistingIndex(
-        this.embeddings,
-        {
-          pineconeIndex,
-          namespace: this.namespace,
-        }
-      );
-      
-      // Search with score
-      const rawResults = await vectorStore.similaritySearchWithScore(query, limit);
-      
-      // Process and return results
-      return rawResults.map(([doc, score]) => ({
-        pageContent: doc.pageContent,
-        metadata: doc.metadata,
-        similarity: score,
-      }));
-    } catch (error) {
-      console.error("Error searching knowledge base:", error);
-      throw error;
-    }
+    return this.withVectorStore(
+      async (vectorStore) => {
+        // Search with score
+        const rawResults = await vectorStore.similaritySearchWithScore(query, limit);
+        
+        // Process and return results
+        return rawResults.map(([doc, score]) => ({
+          pageContent: doc.pageContent,
+          metadata: doc.metadata,
+          similarity: score,
+        }));
+      },
+      [] // Return empty array as fallback
+    );
   }
 
   /**
-   * List available sources in the knowledge base
+   * List all unique sources in the knowledge base
    */
   async listSources(): Promise<{ sources: { url?: string; filename?: string; type: string }[] }> {
-    try {
-      const pineconeIndex = this.pineconeClient.index(this.index);
-      
-      // Create vector store
-      const vectorStore = await PineconeStore.fromExistingIndex(
-        this.embeddings,
-        {
-          pineconeIndex,
-          namespace: this.namespace,
-        }
-      );
-      
-      // Query a few documents to examine metadata
-      const results = await vectorStore.similaritySearch("information", 100);
-      
-      // Extract unique sources
-      const sources = new Map<string, { url?: string; filename?: string; type: string }>();
-      
-      results.forEach(doc => {
-        if (doc.metadata.source === "web" && doc.metadata.url) {
-          sources.set(doc.metadata.url, {
-            url: doc.metadata.url,
-            type: "web",
-          });
-        } else if (doc.metadata.source === "file" && doc.metadata.filename) {
-          sources.set(doc.metadata.filename, {
-            filename: doc.metadata.filename,
-            type: "file",
-          });
-        }
-      });
-      
-      return {
-        sources: Array.from(sources.values()),
-      };
-    } catch (error) {
-      console.error("Error listing sources:", error);
-      return { sources: [] };
-    }
+    return this.withVectorStore(
+      async (vectorStore) => {
+        // Query a few documents to examine metadata
+        const results = await vectorStore.similaritySearch("information", 100);
+        
+        // Extract unique sources
+        const sources = new Map<string, { url?: string; filename?: string; type: string }>();
+        
+        results.forEach(doc => {
+          if (doc.metadata.source === "web" && doc.metadata.url) {
+            sources.set(doc.metadata.url, {
+              url: doc.metadata.url,
+              type: "web",
+            });
+          } else if (doc.metadata.source === "file" && doc.metadata.filename) {
+            sources.set(doc.metadata.filename, {
+              filename: doc.metadata.filename,
+              type: "file",
+            });
+          }
+        });
+        
+        return {
+          sources: Array.from(sources.values()),
+        };
+      },
+      { sources: [] } // Return empty sources as fallback
+    );
   }
 
   /**

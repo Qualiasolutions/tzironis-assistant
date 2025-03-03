@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { KnowledgeBase } from "@/app/lib/knowledge-base";
 
+// Add configuration to prevent this from running at build time
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 export async function GET(req: NextRequest) {
   try {
     // Get environment variables
@@ -11,9 +15,10 @@ export async function GET(req: NextRequest) {
 
     // Validate environment variables
     if (!pineconeApiKey || !pineconeIndex || !mistralApiKey) {
+      console.warn("Knowledge base API: Missing required environment variables");
       return NextResponse.json(
-        { error: "Missing required environment variables" },
-        { status: 500 }
+        { sources: [], status: "config_missing" },
+        { status: 200 }
       );
     }
 
@@ -28,13 +33,27 @@ export async function GET(req: NextRequest) {
 
     // List sources
     const sources = await knowledgeBase.listSources();
-
-    return NextResponse.json(sources);
+    
+    console.log(`Knowledge base API: Successfully retrieved ${sources.sources.length} sources`);
+    return NextResponse.json({
+      ...sources,
+      status: "success"
+    });
   } catch (error: any) {
-    console.error("Error in knowledge base sources API:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`Error in knowledge base sources API: ${errorMessage}`, {
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
+    
+    // Instead of returning an error, return an empty array with error status
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
-      { status: 500 }
+      { 
+        sources: [],
+        status: "error",
+        message: "Failed to retrieve knowledge base sources"
+      },
+      { status: 200 }
     );
   }
 } 

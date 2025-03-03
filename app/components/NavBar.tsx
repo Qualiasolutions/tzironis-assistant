@@ -99,10 +99,6 @@ export default function NavBar() {
                 Home
               </NavLink>
               
-              <NavLink href="/chat" active={pathname === "/chat"} onClick={closeMenus}>
-                {t("navChat")}
-              </NavLink>
-              
               <NavLink href="/knowledge-base" active={pathname.includes("/knowledge-base")} onClick={closeMenus}>
                 {t("navKnowledgeBase")}
               </NavLink>
