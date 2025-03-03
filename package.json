@@ -22,7 +22,7 @@
     "next-auth": "^4.24.5",
     "next-intl": "^3.26.5",
     "openai": "^4.24.1",
-    "puppeteer": "^22.0.0",
+    "puppeteer": "^19.11.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^10.0.0",
