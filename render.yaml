@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: qualia-assistant
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: yfXiFdShH8eniWkhBfhp17bakOwoPYWb
+        sync: false
+      - key: pcsk_2Xa6g4_5hUrWQV9U79PpQxzaykRSNDwTM9X9NyivynYZQqrZi5chBg8BkKpy6Nvowwa7S6
+        sync: false
+      - key: tzironis-kb-mistral
+        value: tzironis-kb-mistral
+      - key: us-east-1-aws
+        value: us-east-1-aws
+      - key: https://tzironis-kb-mistral-fxw4htw.svc.aped-4627-b74a.pinecone.io
+        value: https://tzironis-kb-mistral-fxw4htw.svc.aped-4627-b74a.pinecone.io
+      - key: NEXTAUTH_SECRET
+        value: qualia_secret_key_change_in_production
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: WEBSITE_URL
+        value: https://tzironis.gr
+      - key: CRAWL_INTERVAL
+        value: "604800"
+    autoDeploy: true
+    healthCheckPath: /api/health 
