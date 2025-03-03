@@ -60,10 +60,11 @@ export default function ChatInterface() {
       }
 
       const data = await response.json();
+      console.log("API Response:", data); // Debug log to see response structure
       
       setMessages((prevMessages) => [
         ...prevMessages,
-        { role: "assistant", content: data.message },
+        { role: "assistant", content: data.content },
       ]);
     } catch (error) {
       console.error("Error sending message:", error);
