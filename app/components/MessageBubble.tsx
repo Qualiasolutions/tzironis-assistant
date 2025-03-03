@@ -42,12 +42,12 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
 
   return (
     <div 
-      className={`flex ${isUser ? "justify-end" : "justify-start"} animate-fadein`}
+      className={`flex ${isUser ? "justify-end" : "justify-start"} animate-fadein w-full`}
     >
       <div
         className={`flex items-start gap-3 ${
           isUser ? "flex-row-reverse" : "flex-row"
-        } max-w-[85%]`}
+        } max-w-[85%] sm:max-w-[75%]`}
       >
         {showAvatar && (
           <div className="flex-shrink-0 mt-1">
@@ -67,11 +67,11 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
               ? "bg-accent text-white rounded-2xl rounded-tr-sm"
               : "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-2xl rounded-tl-sm border border-slate-200 dark:border-slate-700"
             } 
-            px-4 py-3 shadow-sm
+            px-4 py-3 shadow-sm w-full break-words
           `}
         >
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown>
+          <div className="prose prose-sm dark:prose-invert max-w-none overflow-auto">
+            <ReactMarkdown className="whitespace-pre-wrap break-words">
               {message.content}
             </ReactMarkdown>
           </div>

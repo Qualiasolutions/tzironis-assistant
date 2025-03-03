@@ -13,15 +13,17 @@ interface VoiceControlsProps {
 export default function VoiceControls({ onTextInput, disabled = false, className = "" }: VoiceControlsProps) {
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+    if (typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognitionInstance = new SpeechRecognition();
       recognitionInstance.continuous = true;
       recognitionInstance.interimResults = true;
-      recognitionInstance.lang = language === "en" ? "en-US" : "el-GR";
+      
+      // Update language when the language context changes
+      recognitionInstance.lang = language === "el" ? "el-GR" : "en-US";
       
       recognitionInstance.onresult = (event) => {
         const transcript = Array.from(event.results)
@@ -83,13 +85,26 @@ export default function VoiceControls({ onTextInput, disabled = false, className
   }
 
   return (
-    <button
-      onClick={toggleListening}
-      disabled={disabled}
-      className={`p-2 ${isListening ? 'text-red-500' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'} disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${className}`}
-      aria-label={isListening ? "Stop listening" : "Start voice input"}
-    >
-      {isListening ? <StopCircle className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-    </button>
+    <div className="relative">
+      <button
+        onClick={toggleListening}
+        disabled={disabled}
+        className={`p-2 ${isListening ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'} disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-full ${className}`}
+        aria-label={isListening ? t("stopListening") : t("startListening")}
+        title={isListening ? t("stopListening") : t("startListening")}
+      >
+        {isListening ? (
+          <StopCircle className="h-5 w-5 animate-pulse" />
+        ) : (
+          <Mic className="h-5 w-5" />
+        )}
+      </button>
+      
+      {isListening && (
+        <span className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
+          {language === "el" ? "Σας ακούω..." : "Listening..."}
+        </span>
+      )}
+    </div>
   );
 } 

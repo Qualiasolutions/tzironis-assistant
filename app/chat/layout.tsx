@@ -1,5 +1,14 @@
+'use client';
+
 import React from 'react';
 import NavBar from '../components/NavBar';
+import dynamic from 'next/dynamic';
+
+// Dynamically import PWAInstallPrompt with no SSR to avoid hydration errors
+const PWAInstallPrompt = dynamic(
+  () => import('../components/PWAInstallPrompt'),
+  { ssr: false }
+);
 
 export default function ChatLayout({
   children,
@@ -12,6 +21,7 @@ export default function ChatLayout({
       <main className="flex-grow container mx-auto py-6">
         {children}
       </main>
+      <PWAInstallPrompt />
     </div>
   );
 } 

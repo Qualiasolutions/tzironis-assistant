@@ -95,25 +95,27 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-white dark:bg-slate-900">
+    <div className="flex flex-col h-full max-h-full w-full bg-white dark:bg-slate-900 relative">
       {/* Chat messages container */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-20">
-        {messages.map((message, index) => (
-          <MessageBubble key={index} message={message} />
-        ))}
-        {isLoading && (
-          <div className="flex justify-center py-4">
-            <div className="animate-pulse flex space-x-2 items-center">
-              <Bot className="h-5 w-5 text-primary" />
-              <span className="text-sm text-slate-500 dark:text-slate-400">{t("loading")}</span>
+      <div className="flex-1 overflow-y-auto pb-32">
+        <div className="px-4 py-4 space-y-6">
+          {messages.map((message, index) => (
+            <MessageBubble key={index} message={message} />
+          ))}
+          {isLoading && (
+            <div className="flex justify-center py-4">
+              <div className="animate-pulse flex space-x-2 items-center">
+                <Bot className="h-5 w-5 text-primary" />
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t("loading")}</span>
+              </div>
             </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+          )}
+          <div ref={messagesEndRef} className="h-4" />
+        </div>
       </div>
 
       {/* Input area - fixed at bottom */}
-      <div className="border-t border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900 absolute bottom-0 left-0 right-0">
+      <div className="border-t border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900 absolute bottom-0 left-0 right-0 shadow-md">
         <div className="relative flex items-center">
           <VoiceControls 
             onTextInput={handleTextInput} 

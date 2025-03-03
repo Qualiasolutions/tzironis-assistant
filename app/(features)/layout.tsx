@@ -1,5 +1,14 @@
+'use client';
+
 import React from 'react';
 import NavBar from '../components/NavBar';
+import dynamic from 'next/dynamic';
+
+// Dynamically import PWAInstallPrompt with no SSR to avoid hydration errors
+const PWAInstallPrompt = dynamic(
+  () => import('../components/PWAInstallPrompt'),
+  { ssr: false }
+);
 
 export default function FeaturesLayout({
   children,
@@ -37,6 +46,7 @@ export default function FeaturesLayout({
           </div>
         </div>
       </footer>
+      <PWAInstallPrompt />
     </div>
   );
 } 
