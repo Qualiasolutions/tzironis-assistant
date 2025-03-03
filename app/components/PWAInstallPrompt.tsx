@@ -4,12 +4,16 @@ import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../lib/LanguageContext';
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 interface PWAInstallPromptProps {
   className?: string;
 }
 
 export default function PWAInstallPrompt({ className }: PWAInstallPromptProps) {
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const { t } = useLanguage();
 
@@ -18,12 +22,12 @@ export default function PWAInstallPrompt({ className }: PWAInstallPromptProps) {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       // Store the event for later use
-      setInstallPrompt(e);
+      setInstallPrompt(e as BeforeInstallPromptEvent);
       setIsVisible(true);
     };
 
     // Listen for the beforeinstallprompt event
-    window.addEventListener('pwaInstallAvailable', handleBeforeInstallPrompt);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Check if the app is already installed
     const isAppInstalled = window.matchMedia('(display-mode: standalone)').matches;
@@ -32,7 +36,7 @@ export default function PWAInstallPrompt({ className }: PWAInstallPromptProps) {
     }
 
     return () => {
-      window.removeEventListener('pwaInstallAvailable', handleBeforeInstallPrompt);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
@@ -41,12 +45,10 @@ export default function PWAInstallPrompt({ className }: PWAInstallPromptProps) {
 
     // Show the install prompt
     try {
-      // @ts-ignore - deferredPrompt is not a standard property
-      const result = await window.deferredPrompt.prompt();
+      const result = await installPrompt.prompt();
       console.log('Install prompt result:', result);
       
-      // Reset the deferred prompt variable
-      window.deferredPrompt = null;
+      // Reset the prompt variable
       setInstallPrompt(null);
       setIsVisible(false);
     } catch (error) {

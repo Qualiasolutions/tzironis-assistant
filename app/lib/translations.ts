@@ -28,6 +28,11 @@ export const translations = {
     mobileApp: "Mobile App",
     desktopApp: "Desktop App",
     
+    // PWA Installation
+    installApp: "Install App",
+    installPromptMessage: "Install this app on your device for quick and easy access.",
+    installNow: "Install Now",
+    
     // Chat
     chatWelcome: "Hello! I'm Qualia, your business assistant for Tzironis. How can I help you today?",
     chatWelcomeMessage: "Hello! I'm Qualia, your business assistant for Tzironis. How can I help you today?",
@@ -170,6 +175,11 @@ export const translations = {
     pressEnterToSubmit: "Πατήστε Enter για υποβολή",
     mobileApp: "Εφαρμογή για Κινητά",
     desktopApp: "Εφαρμογή για Υπολογιστές",
+    
+    // PWA Installation
+    installApp: "Εγκατάσταση Εφαρμογής",
+    installPromptMessage: "Εγκαταστήστε αυτή την εφαρμογή στη συσκευή σας για γρήγορη και εύκολη πρόσβαση.",
+    installNow: "Εγκατάσταση Τώρα",
     
     // Chat
     chatWelcome: "Γειά! Είμαι ο QUALIA, ο επιχειρηματικός βοηθός σας για την Tzironis. Πώς μπορώ να σας βοηθήσω σήμερα?",
