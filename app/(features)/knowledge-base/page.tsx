@@ -150,6 +150,8 @@ export default function KnowledgePage() {
       setSources(response.data.sources || []);
     } catch (error: any) {
       console.error("Error loading sources:", error);
+      // Set empty sources array instead of failing
+      setSources([]);
     } finally {
       setIsLoadingSources(false);
     }
@@ -177,9 +179,12 @@ export default function KnowledgePage() {
     }
   };
   
-  // Load sources on initial render
+  // Load sources when the component mounts
   useEffect(() => {
-    loadSources();
+    // Only load sources on client side, not during SSR or build
+    if (typeof window !== 'undefined') {
+      loadSources();
+    }
   }, []);
 
   return (

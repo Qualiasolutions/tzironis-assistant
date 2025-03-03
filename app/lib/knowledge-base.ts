@@ -120,7 +120,8 @@ export class KnowledgeBase {
           
           // Test the connection
           const indexes = await this.pineconeClient.listIndexes();
-          console.log(`Pinecone connection successful. Available indexes: ${indexes.length}`);
+          const indexCount = Object.keys(indexes.indexes || {}).length;
+          console.log(`Pinecone connection successful. Available indexes: ${indexCount}`);
           
           this.connectionInitialized = true;
           return this.pineconeClient;

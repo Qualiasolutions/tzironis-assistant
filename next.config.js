@@ -32,6 +32,14 @@ const nextConfig = {
     // Disable TypeScript errors during build to prevent failures
     ignoreBuildErrors: true,
   },
+  webpack: (config, { isServer }) => {
+    // Suppress the webpack warnings about missing @next/swc platform packages
+    config.infrastructureLogging = {
+      level: 'error',
+    };
+    
+    return config;
+  },
 };
 
 module.exports = withPWA(nextConfig); 
