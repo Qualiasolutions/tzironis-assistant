@@ -187,6 +187,10 @@ export default function ChatInterface() {
     setInputValue(text);
   };
 
+  const handlePredefinedMessage = (message: string) => {
+    setInputValue(message);
+  };
+
   return (
     <div className="flex flex-col h-full max-h-full w-full bg-white dark:bg-gray-900 relative">
       {/* Chat header */}
@@ -211,6 +215,32 @@ export default function ChatInterface() {
               </div>
             </div>
           )}
+          {messages.length === 0 && (
+            <div className="bg-muted/40 rounded-lg p-4 mt-4">
+              <h3 className="font-medium text-lg mb-2 text-foreground">{t("chatWelcome")}</h3>
+              <p className="text-muted-foreground mb-3">{t("features")}</p>
+              <div className="grid gap-2">
+                <button
+                  className="bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
+                  onClick={() => handlePredefinedMessage(t("invoiceAutomationQuery") || "How do I automate my invoicing?")}
+                >
+                  {t("invoiceAutomationQuery") || "How do I automate my invoicing?"}
+                </button>
+                <button
+                  className="bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
+                  onClick={() => handlePredefinedMessage(t("leadGenerationQuery") || "How can I generate more business leads?")}
+                >
+                  {t("leadGenerationQuery") || "How can I generate more business leads?"}
+                </button>
+                <button
+                  className="bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
+                  onClick={() => handlePredefinedMessage(t("productQuery") || "What school supplies do you offer?")}
+                >
+                  {t("productQuery") || "What school supplies do you offer?"}
+                </button>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} className="h-4" />
         </div>
       </div>
@@ -223,7 +253,7 @@ export default function ChatInterface() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t("chatPlaceholder") || "Type your message..."}
+            placeholder={t("chatInputPlaceholder") || "Ask something about Tzironis products, services or invoice automation..."}
             className="w-full py-3 pl-4 pr-24 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full resize-none text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             rows={1}
             disabled={isLoading}

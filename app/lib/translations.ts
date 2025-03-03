@@ -98,13 +98,19 @@ export const translations = {
     footerTerms: "Terms of Service",
     
     // Chat Interface
-    chatWelcomeMessage: "Hello! I'm QUALIA, your business assistant for Tzironis. How can I help you today?",
-    chatPlaceholder: "Type your message here...",
+    chatWelcomeMessage: "Hello! I'm QUALIA, your business assistant for Tzironis. I can help with website information, invoice automation, and product details. What would you like to know today?",
+    chatPlaceholder: "Type your message...",
+    chatInputPlaceholder: "Ask about Tzironis products, services or invoice automation...",
     typeMessage: "Type your message or use voice input...",
     sendMessage: "Send message",
     errorMessage: "I'm sorry, I encountered an error while processing your request. Please try again.",
     poweredBy: "Powered by",
     searchingKnowledgeBase: "Searching the knowledge base...",
+    chatWelcome: "How can I assist you today?",
+    features: "I can help with product information, invoicing, and lead generation. Try one of these:",
+    invoiceAutomationQuery: "How do I automate my invoicing?",
+    leadGenerationQuery: "How can I generate more business leads?",
+    productQuery: "What school supplies do you offer?",
   },
   el: {
     // Navigation
@@ -172,9 +178,10 @@ export const translations = {
     installNow: "Εγκατάσταση Τώρα",
     
     // Chat
-    chatWelcome: "Γειά! Είμαι ο QUALIA, ο επιχειρηματικός βοηθός σας για την Tzironis. Πώς μπορώ να σας βοηθήσω σήμερα?",
-    chatWelcomeMessage: "Γειά! Είμαι ο QUALIA, ο επιχειρηματικός βοηθός σας για την Tzironis. Πώς μπορώ να σας βοηθήσω σήμερα?",
-    chatPlaceholder: "Πληκτρολογήστε το μήνυμά σας εδώ...",
+    chatWelcome: "Πώς μπορώ να σας βοηθήσω σήμερα;",
+    chatWelcomeMessage: "Γειά! Είμαι η QUALIA, ο επιχειρηματικός βοηθός σας για την Tzironis. Μπορώ να σας βοηθήσω με πληροφορίες ιστοσελίδας, αυτοματισμό τιμολογίων και λεπτομέρειες προϊόντων. Τι θα θέλατε να μάθετε σήμερα;",
+    chatPlaceholder: "Γράψτε το μήνυμά σας...",
+    chatInputPlaceholder: "Ρωτήστε για προϊόντα, υπηρεσίες ή αυτοματισμό τιμολογίων της Tzironis...",
     typeMessage: "Πληκτρολογήστε το μήνυμά σας ή χρησιμοποιήστε φωνητική είσοδο...",
     sendMessage: "Αποστολή μηνύματος",
     errorMessage: "Λυπούμαι, αντιμετώπισα ένα πρόβλημα επεξεργάζοντας την αίτησή σας. Παρακαλώ προσπαθήστε αργότερα.",
@@ -184,6 +191,10 @@ export const translations = {
     stopPlayback: "Σταμάτησε",
     poweredBy: "Από την",
     searchingKnowledgeBase: "Αναζητώ στη βάση γνώσεων...",
+    features: "Μπορώ να βοηθήσω με πληροφορίες προϊόντων, τιμολόγηση και δημιουργία επιχειρηματικών συνδέσμων. Δοκιμάστε ένα από αυτά:",
+    invoiceAutomationQuery: "Πώς μπορώ να αυτοματοποιήσω την τιμολόγησή μου;",
+    leadGenerationQuery: "Πώς μπορώ να δημιουργήσω περισσότερους επιχειρηματικούς συνδέσμους;",
+    productQuery: "Τι σχολικά είδη προσφέρετε;",
     
     // Auth
     signIn: "Σύνδεση",
