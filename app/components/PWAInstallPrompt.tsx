@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button } from './ui/button';
 import { X } from 'lucide-react';
-import { useTranslation } from '../lib/LanguageContext';
+import { useLanguage } from '../lib/LanguageContext';
 
 interface PWAInstallPromptProps {
   className?: string;
@@ -12,7 +11,7 @@ interface PWAInstallPromptProps {
 export default function PWAInstallPrompt({ className }: PWAInstallPromptProps) {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const { t } = useTranslation();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Store the event for later use
@@ -76,12 +75,12 @@ export default function PWAInstallPrompt({ className }: PWAInstallPromptProps) {
         {t('installPromptMessage') || 'Install this app on your device for quick and easy access.'}
       </p>
       <div className="flex justify-end">
-        <Button 
+        <button 
           onClick={handleInstallClick}
-          className="bg-primary hover:bg-primary/90 text-white"
+          className="bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           {t('installNow') || 'Install Now'}
-        </Button>
+        </button>
       </div>
     </div>
   );

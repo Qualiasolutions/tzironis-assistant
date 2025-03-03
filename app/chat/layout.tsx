@@ -21,6 +21,7 @@ export default function ChatLayout({
       <main className="flex-grow container mx-auto py-6">
         {children}
       </main>
+      {/* PWA Install Prompt will render when installation is available */}
       <PWAInstallPrompt />
     </div>
   );

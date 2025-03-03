@@ -46,6 +46,7 @@ export default function FeaturesLayout({
           </div>
         </div>
       </footer>
+      {/* PWA Install Prompt will render when installation is available */}
       <PWAInstallPrompt />
     </div>
   );

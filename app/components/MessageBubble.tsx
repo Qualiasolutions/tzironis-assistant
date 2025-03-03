@@ -71,9 +71,11 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
           `}
         >
           <div className="prose prose-sm dark:prose-invert max-w-none overflow-auto">
-            <ReactMarkdown className="whitespace-pre-wrap break-words">
-              {message.content}
-            </ReactMarkdown>
+            <div className="whitespace-pre-wrap break-words">
+              <ReactMarkdown>
+                {message.content}
+              </ReactMarkdown>
+            </div>
           </div>
           
           <div className="flex justify-end items-center gap-1.5 mt-2 opacity-70 hover:opacity-100 transition-opacity">

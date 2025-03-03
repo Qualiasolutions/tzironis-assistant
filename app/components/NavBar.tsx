@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { 
@@ -119,6 +120,17 @@ export default function NavBar() {
           {/* Right side buttons and controls */}
           <div className="flex items-center space-x-2">
             <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+            
+            {/* Logo in the top right */}
+            <div className="hidden md:block">
+              <Image 
+                src="/icons/logo.png" 
+                alt="Tzironis Logo" 
+                width={40} 
+                height={40} 
+                className="rounded-md"
+              />
+            </div>
             
             {/* Profile dropdown button */}
             {session ? (
