@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-  /* Base colors - Modern blue/purple palette */
-  --primary: #6c5ce7;
-  --primary-hover: #5649c0;
-  --accent: #8b5cf6;
-  --accent-hover: #7c3aed;
+  /* Base colors - New color scheme with #145199 as primary */
+  --primary: #145199;
+  --primary-hover: #0e3d78;
+  --accent: #2474cc;
+  --accent-hover: #1e62b0;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -19,12 +19,12 @@
   --card: #ffffff;
   --card-foreground: #1e293b;
   --border: #e2e8f0;
-  --ring: rgba(108, 92, 231, 0.3);
+  --ring: rgba(20, 81, 153, 0.3);
   
   /* UI component colors */
   --muted: #f8fafc;
   --muted-foreground: #4b5563;
-  --secondary: #f1f5f9;
+  --secondary: #ffffff;
   --secondary-foreground: #1e293b;
   
   /* Typography */
@@ -33,10 +33,10 @@
 
 .dark {
   /* Dark mode colors */
-  --primary: #6c5ce7;
-  --primary-hover: #8574e9;
-  --accent: #8b5cf6;
-  --accent-hover: #a78bfa;
+  --primary: #145199;
+  --primary-hover: #1963b5;
+  --accent: #2474cc;
+  --accent-hover: #3385db;
   
   /* Neutral colors */
   --background: #0f172a;
@@ -44,7 +44,7 @@
   --card: #1e293b;
   --card-foreground: #f1f5f9;
   --border: #334155;
-  --ring: rgba(108, 92, 231, 0.3);
+  --ring: rgba(20, 81, 153, 0.3);
   
   /* UI component colors */
   --muted: #1e293b;
