@@ -12,21 +12,21 @@ export default function Features() {
     {
       id: 'knowledge-base',
       title: t('navKnowledgeBase') || 'Knowledge Base',
-      description: t('knowledgeBaseDesc') || 'Search and manage your business knowledge base',
+      description: 'Search and manage your business knowledge base',
       icon: <Database className="h-6 w-6 text-primary" />,
       href: '/knowledge-base',
     },
     {
       id: 'invoice-automation',
       title: t('navInvoiceAutomation') || 'Invoice Automation',
-      description: t('invoiceAutomationDesc') || 'Automate your invoice processing workflow',
+      description: 'Automate your invoice processing workflow',
       icon: <FileText className="h-6 w-6 text-primary" />,
       href: '/invoice-automation',
     },
     {
       id: 'lead-generation',
       title: t('navLeadGeneration') || 'Lead Generation',
-      description: t('leadGenerationDesc') || 'Generate and manage business leads',
+      description: 'Generate and manage business leads',
       icon: <Users className="h-6 w-6 text-primary" />,
       href: '/lead-generation',
     },
@@ -39,7 +39,7 @@ export default function Features() {
           Tzironis Business Suite
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          {t('welcomeMessage') || 'Access powerful business tools powered by AI to streamline your operations.'}
+          Access powerful business tools powered by AI to streamline your operations.
         </p>
       </div>
 
