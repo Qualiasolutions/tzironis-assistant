@@ -44,6 +44,7 @@ export const translations = {
     startListening: "Start listening",
     stopListening: "Stop listening",
     poweredByMistral: "",
+    searchingKnowledgeBase: "Searching the Tzironis knowledge base for information...",
     
     // Home Page
     homeTitle: "QUALIA Assistant",
@@ -186,6 +187,7 @@ export const translations = {
     startListening: "Έναρξη ακρόασης",
     stopListening: "Διακοπή ακρόασης",
     poweredByMistral: "",
+    searchingKnowledgeBase: "Αναζήτηση πληροφοριών στη βάση γνώσεων της Tzironis...",
     
     // Home Page
     homeTitle: "QUALIA Βοηθός",

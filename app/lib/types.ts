@@ -3,8 +3,14 @@ export type LocaleType = "en" | "el";
 
 // Message interface for chat
 export interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
+  sources?: {
+    url?: string;
+    title?: string;
+    score?: number;
+    filename?: string;
+  }[];
 }
 
 // Knowledge Base types

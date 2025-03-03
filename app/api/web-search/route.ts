@@ -1,0 +1,108 @@
+import { NextRequest, NextResponse } from "next/server";
+import { KnowledgeBase } from "@/app/lib/knowledge-base";
+import MistralClient from "@mistralai/mistralai";
+
+export async function POST(req: NextRequest) {
+  try {
+    const { query, limit = 5 } = await req.json();
+
+    if (!query || typeof query !== 'string') {
+      return NextResponse.json(
+        { error: "Invalid query" },
+        { status: 400 }
+      );
+    }
+
+    // Get environment variables
+    const pineconeApiKey = process.env.PINECONE_API_KEY;
+    const pineconeIndex = process.env.PINECONE_INDEX;
+    const openAIApiKey = process.env.OPENAI_API_KEY;
+    const mistralApiKey = process.env.MISTRAL_API_KEY;
+
+    // Validate environment variables
+    if (!pineconeApiKey || !pineconeIndex || !mistralApiKey) {
+      return NextResponse.json(
+        { error: "Missing required environment variables" },
+        { status: 500 }
+      );
+    }
+
+    // Initialize knowledge base
+    const knowledgeBase = new KnowledgeBase({
+      pineconeApiKey,
+      pineconeIndex,
+      openaiApiKey: openAIApiKey,
+      mistralApiKey,
+      namespace: 'tzironis-kb-mistral',
+    });
+
+    // Search the knowledge base
+    const searchResults = await knowledgeBase.search(query, limit);
+
+    // If no results found
+    if (searchResults.length === 0) {
+      return NextResponse.json({
+        answer: "I couldn't find any specific information about that in my knowledge base. I can only provide information based on what I've been trained on and the data available in the Tzironis knowledge base.",
+        sources: [],
+      });
+    }
+
+    // Extract the content and sources
+    const context = searchResults.map(result => result.pageContent).join("\n\n");
+    const sources = searchResults.map(result => {
+      // Handle both web and file sources
+      if (result.metadata.source === 'web') {
+        return {
+          url: result.metadata.url,
+          title: result.metadata.title || result.metadata.url,
+          similarity: result.similarity,
+          type: 'web'
+        };
+      } else {
+        return {
+          filename: result.metadata.filename,
+          title: result.metadata.title || result.metadata.filename,
+          similarity: result.similarity,
+          type: 'file'
+        };
+      }
+    });
+
+    // Initialize AI client
+    const mistral = new MistralClient(mistralApiKey);
+
+    // Prepare the prompt
+    const systemPrompt = `You are a web search assistant for Tzironis. Answer the user's query based ONLY on the following information from the Tzironis knowledge base:
+
+${context}
+
+Provide a concise, helpful, and accurate answer. If the information does not completely answer the question, explain what you know from these sources and what might be missing. Always cite the sources when appropriate.
+
+DO NOT make up or infer information that is not present in the provided context. If you don't know the answer, say so clearly and suggest that the user might want to try a different search query.`;
+
+    // Call AI API to generate the answer
+    const response = await mistral.chat({
+      model: "mistral-large-latest",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: query }
+      ],
+      temperature: 0.3,
+      maxTokens: 1000,
+    });
+
+    // Extract the answer
+    const answer = response.choices[0].message.content;
+
+    return NextResponse.json({
+      answer,
+      sources,
+    });
+  } catch (error: any) {
+    console.error("Error in web search API:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+} 

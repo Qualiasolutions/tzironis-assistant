@@ -43,6 +43,19 @@ export default function ChatInterface() {
     setInputValue("");
     setIsLoading(true);
 
+    // Check if this is a web search query
+    const isWebSearch = /search for|find information|look up|αναζήτηση για|βρες πληροφορίες|ψάξε για/i.test(inputValue);
+    
+    if (isWebSearch) {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { 
+          role: "assistant", 
+          content: t("searchingKnowledgeBase") || "Searching the knowledge base...",
+        },
+      ]);
+    }
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -62,19 +75,43 @@ export default function ChatInterface() {
       const data = await response.json();
       console.log("API Response:", data); // Debug log to see response structure
       
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { role: "assistant", content: data.content },
-      ]);
+      // If this was a search query, replace the "searching..." message
+      if (isWebSearch) {
+        setMessages((prevMessages) => [
+          ...prevMessages.slice(0, prevMessages.length - 1),
+          { 
+            role: "assistant", 
+            content: data.content,
+            sources: data.sources 
+          },
+        ]);
+      } else {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { role: "assistant", content: data.content, sources: data.sources },
+        ]);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          role: "assistant",
-          content: t("errorMessage"),
-        },
-      ]);
+      
+      // If this was a search query, replace the "searching..." message
+      if (isWebSearch) {
+        setMessages((prevMessages) => [
+          ...prevMessages.slice(0, prevMessages.length - 1),
+          {
+            role: "assistant",
+            content: t("errorMessage"),
+          },
+        ]);
+      } else {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: t("errorMessage"),
+          },
+        ]);
+      }
     } finally {
       setIsLoading(false);
       setTimeout(() => {
