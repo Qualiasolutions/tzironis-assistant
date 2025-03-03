@@ -5,7 +5,7 @@ import { useLanguage } from "@/app/lib/LanguageContext";
 import MessageBubble from "./MessageBubble";
 import { Message } from "@/app/lib/types";
 import VoiceControls from "./VoiceControls";
-import { Send, Bot, Sparkles } from "lucide-react";
+import { Send, Bot, Sparkles, Globe } from "lucide-react";
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -13,7 +13,7 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { t, language } = useLanguage();
+  const { t, language, changeLanguage } = useLanguage();
 
   useEffect(() => {
     // Set welcome message
@@ -41,6 +41,63 @@ export default function ChatInterface() {
 
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInputValue("");
+    
+    // Check if the user is asking about Greek language
+    if (inputValue.toLowerCase().trim() === "greek?" || 
+        inputValue.toLowerCase().includes("switch to greek") || 
+        inputValue.toLowerCase().includes("ελληνικά") || 
+        inputValue.toLowerCase().includes("greek language")) {
+      
+      // Change language to Greek
+      if (language !== "el") {
+        changeLanguage("el");
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: "Αλλάζω σε Ελληνικά! Μπορείτε επίσης να αλλάξετε γλώσσα χρησιμοποιώντας τον επιλογέα γλώσσας στην επάνω δεξιά γωνία της οθόνης.",
+          },
+        ]);
+      } else {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: "Η εφαρμογή είναι ήδη στα Ελληνικά! Χρησιμοποιήστε τον επιλογέα γλώσσας στην επάνω δεξιά γωνία για να αλλάξετε γλώσσα.",
+          },
+        ]);
+      }
+      return;
+    }
+    
+    // Check if the user is asking about English language
+    if (inputValue.toLowerCase().trim() === "english?" || 
+        inputValue.toLowerCase().includes("switch to english") || 
+        inputValue.toLowerCase().includes("αγγλικά") ||
+        inputValue.toLowerCase().includes("english language")) {
+      
+      // Change language to English
+      if (language !== "en") {
+        changeLanguage("en");
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: "Switching to English! You can also change the language using the language selector in the top right corner of the screen.",
+          },
+        ]);
+      } else {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: "The application is already in English! Use the language selector in the top right corner to change languages.",
+          },
+        ]);
+      }
+      return;
+    }
+
     setIsLoading(true);
 
     // Check if this is a web search query

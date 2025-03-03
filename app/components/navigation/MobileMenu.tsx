@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare, Database, FileText, Users } from "lucide-react";
+import { MessageSquare, Database, FileText, Users, Globe } from "lucide-react";
 import { useLanguage } from "@/app/lib/LanguageContext";
+import LanguageSwitcher from "../LanguageSwitcher";
 
 interface MobileMenuProps {
   pathname: string;
@@ -30,6 +31,13 @@ export default function MobileMenu({ pathname, closeMenu }: MobileMenuProps) {
           <Users className="h-5 w-5 mr-2" />
           {t("navLeadGeneration")}
         </MobileNavLink>
+        <div className="flex items-center justify-between px-3 py-3">
+          <div className="flex items-center">
+            <Globe className="h-5 w-5 mr-2 text-gray-700 dark:text-gray-300" />
+            <span className="text-gray-700 dark:text-gray-300">Language</span>
+          </div>
+          <LanguageSwitcher />
+        </div>
       </div>
     </div>
   );

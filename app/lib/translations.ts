@@ -96,6 +96,15 @@ export const translations = {
     footerRights: "All rights reserved.",
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Service",
+    
+    // Chat Interface
+    chatWelcomeMessage: "Hello! I'm QUALIA, your business assistant for Tzironis. How can I help you today?",
+    chatPlaceholder: "Type your message here...",
+    typeMessage: "Type your message or use voice input...",
+    sendMessage: "Send message",
+    errorMessage: "I'm sorry, I encountered an error while processing your request. Please try again.",
+    poweredBy: "Powered by",
+    searchingKnowledgeBase: "Searching the knowledge base...",
   },
   el: {
     // Navigation
@@ -173,6 +182,8 @@ export const translations = {
     microphoneOff: "Κάντε κλικ για να μιλήσετε",
     playResponse: "Αναπαραγωγή",
     stopPlayback: "Σταμάτησε",
+    poweredBy: "Από την",
+    searchingKnowledgeBase: "Αναζητώ στη βάση γνώσεων...",
     
     // Auth
     signIn: "Σύνδεση",
