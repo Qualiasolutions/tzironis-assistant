@@ -172,17 +172,7 @@ export default function LeadGenerationPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-white px-4">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="mr-2 rounded-full p-1 hover:bg-gray-100">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <Users className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold text-primary">Lead Generation</h1>
-        </div>
-      </header>
-
+    <div className="flex flex-col">
       <main className="flex-1 p-4 sm:p-6">
         <div className="mx-auto max-w-6xl">
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -190,7 +180,7 @@ export default function LeadGenerationPage() {
               <h2 className="text-2xl font-bold tracking-tight">
                 Business Lead Management
               </h2>
-              <p className="mt-1 text-muted-foreground">
+              <p className="mt-1 text-black dark:text-white">
                 Generate and manage potential business leads
               </p>
             </div>
@@ -231,7 +221,7 @@ export default function LeadGenerationPage() {
 
           <div className="mb-6 flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <input
                 type="text"
                 placeholder="Search leads..."
@@ -241,7 +231,7 @@ export default function LeadGenerationPage() {
               />
             </div>
             <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Filter className="h-4 w-4 text-gray-500" />
               <select
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={statusFilter}
@@ -298,7 +288,7 @@ export default function LeadGenerationPage() {
                             <div>
                               <div className="font-medium">{lead.businessName}</div>
                               {lead.website && (
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-black dark:text-gray-300">
                                   {lead.website}
                                 </div>
                               )}
@@ -310,7 +300,7 @@ export default function LeadGenerationPage() {
                                 <div className="font-medium">{lead.contactPerson}</div>
                               )}
                               {lead.email && (
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-black dark:text-gray-300">
                                   {lead.email}
                                 </div>
                               )}
@@ -345,7 +335,7 @@ export default function LeadGenerationPage() {
                       <tr>
                         <td
                           colSpan={6}
-                          className="px-4 py-8 text-center text-muted-foreground"
+                          className="px-4 py-8 text-center text-black dark:text-white"
                         >
                           No leads found. Try adjusting your search or generate new
                           leads.
