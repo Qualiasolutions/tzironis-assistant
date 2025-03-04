@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { handleChat } from "@/app/lib/ai/openai-assistant";
+import { streamChat } from "@/app/lib/ai/openai-assistant";
 import { createLogger } from "@/app/lib/monitoring/logger";
 import { captureException } from "@/app/lib/monitoring/sentry";
 
 const logger = createLogger('chat-api');
+
+export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,21 +41,8 @@ export async function POST(req: NextRequest) {
       hasThreadId: !!threadId
     });
     
-    // Process the message with our unified assistant
-    const result = await handleChat(threadId, userContent);
-    
-    logger.info('Chat request completed', {
-      threadId: result.threadId,
-      status: result.status
-    });
-
-    return NextResponse.json({
-      role: "assistant",
-      content: result.message,
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      threadId: result.threadId
-    });
+    // Return a streaming response
+    return streamChat(threadId, userContent);
   } catch (error: unknown) {
     logger.error("Error in chat API:", error instanceof Error ? error.message : String(error));
     captureException(error instanceof Error ? error : new Error(String(error)));

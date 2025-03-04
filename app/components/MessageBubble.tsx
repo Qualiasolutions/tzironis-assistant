@@ -51,6 +51,39 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   
+  // If message is streaming, show a loading indicator
+  if (message.isStreaming) {
+    return (
+      <div className="flex justify-start">
+        <div className="max-w-[85%] md:max-w-[75%] message-bubble assistant">
+          <div className="text-sm text-gray-800 dark:text-gray-100">
+            <p className="flex items-center">
+              {message.content || "Thinking"}
+              <span className="ml-2 inline-flex">
+                <span className="animate-bounce mx-0.5 h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-300"></span>
+                <span className="animate-bounce delay-100 mx-0.5 h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-300"></span>
+                <span className="animate-bounce delay-200 mx-0.5 h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-300"></span>
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // If message has an error, show error styling
+  if (message.isError) {
+    return (
+      <div className="flex justify-start">
+        <div className="max-w-[85%] md:max-w-[75%] message-bubble assistant border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+          <div className="text-sm text-red-600 dark:text-red-300">
+            <p>{message.content}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   const parts = parseCodeBlocks(message.content);
   
   const copyToClipboard = async (text: string) => {

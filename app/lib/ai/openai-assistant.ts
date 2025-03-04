@@ -392,4 +392,146 @@ export async function handleChat(threadId: string | null, userMessage: string) {
     captureException(error);
     throw error;
   }
+}
+
+/**
+ * Stream chat responses from the assistant
+ * @param threadId - Existing thread ID or null to create a new one
+ * @param userMessage - The user's message
+ * @returns A streaming response
+ */
+export async function streamChat(threadId: string | null, userMessage: string) {
+  const encoder = new TextEncoder();
+  
+  // Create a ReadableStream to stream the response
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        // Create a new thread if none exists
+        const currentThreadId = threadId || await createThread();
+        
+        // Send initial response with thread ID
+        controller.enqueue(encoder.encode(JSON.stringify({
+          type: 'threadId',
+          threadId: currentThreadId
+        }) + '\n'));
+        
+        // Add user message to thread
+        await addMessageToThread(currentThreadId, userMessage);
+        
+        // Run the assistant
+        const assistant = await getOrCreateAssistant();
+        const run = await runAssistant(currentThreadId, assistant.id);
+        
+        // Send run started event
+        controller.enqueue(encoder.encode(JSON.stringify({
+          type: 'status',
+          status: 'started',
+          runId: run.id
+        }) + '\n'));
+        
+        // Poll for completion
+        let runStatus = await checkRunStatus(currentThreadId, run.id);
+        let attempts = 0;
+        const maxAttempts = 60; // Maximum 5 minutes (60 x 5s)
+        
+        // Send thinking event
+        controller.enqueue(encoder.encode(JSON.stringify({
+          type: 'status',
+          status: 'thinking'
+        }) + '\n'));
+        
+        while (
+          runStatus.status !== "completed" && 
+          runStatus.status !== "failed" && 
+          runStatus.status !== "cancelled" && 
+          attempts < maxAttempts
+        ) {
+          // Handle tool calls if needed
+          if (runStatus.status === "requires_action") {
+            const toolCalls = runStatus.required_action?.submit_tool_outputs.tool_calls || [];
+            
+            // Send tool call event
+            controller.enqueue(encoder.encode(JSON.stringify({
+              type: 'toolCalls',
+              count: toolCalls.length
+            }) + '\n'));
+            
+            await handleToolCalls(currentThreadId, run.id, toolCalls);
+          }
+          
+          // Wait before checking again
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Check status again
+          runStatus = await checkRunStatus(currentThreadId, run.id);
+          attempts++;
+          
+          // Send status update
+          controller.enqueue(encoder.encode(JSON.stringify({
+            type: 'status',
+            status: runStatus.status,
+            progress: Math.min(100, Math.round((attempts / maxAttempts) * 100))
+          }) + '\n'));
+        }
+        
+        if (runStatus.status !== "completed") {
+          throw new Error(`Assistant run did not complete. Status: ${runStatus.status}`);
+        }
+        
+        // Get the latest message from the assistant
+        const messages = await getMessages(currentThreadId, 1);
+        const assistantMessage = messages.find(msg => msg.role === "assistant");
+        
+        if (!assistantMessage) {
+          throw new Error("No assistant message found after completion");
+        }
+        
+        // Extract the message content safely
+        let messageContent = "Sorry, I couldn't generate a response.";
+        if (assistantMessage.content && assistantMessage.content.length > 0) {
+          const contentBlock = assistantMessage.content[0];
+          if ('text' in contentBlock && contentBlock.text && contentBlock.text.value) {
+            messageContent = contentBlock.text.value;
+          }
+        }
+        
+        // Send the final message
+        controller.enqueue(encoder.encode(JSON.stringify({
+          type: 'message',
+          role: 'assistant',
+          content: messageContent,
+          id: assistantMessage.id,
+          timestamp: new Date(),
+          threadId: currentThreadId,
+          status: 'completed'
+        }) + '\n'));
+        
+        // Close the stream
+        controller.close();
+      } catch (error: unknown) {
+        logger.error('Error in streamChat', { 
+          error: error instanceof Error ? error.message : String(error) 
+        });
+        captureException(error instanceof Error ? error : new Error(String(error)));
+        
+        // Send error message
+        controller.enqueue(encoder.encode(JSON.stringify({
+          type: 'error',
+          message: "I'm sorry, I encountered an error processing your request. Please try again later."
+        }) + '\n'));
+        
+        controller.close();
+      }
+    }
+  });
+  
+  // Return the stream as a response
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
+    }
+  });
 } 

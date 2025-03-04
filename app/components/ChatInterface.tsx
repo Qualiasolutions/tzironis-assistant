@@ -65,6 +65,13 @@ export default function ChatInterface() {
     setIsLoading(true);
 
     try {
+      // Add a placeholder message for the assistant's response
+      const placeholderId = `placeholder-${Date.now()}`;
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: "assistant", content: "", id: placeholderId, isStreaming: true },
+      ]);
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -81,32 +88,92 @@ export default function ChatInterface() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      const data = await response.json();
-      
-      // Update the threadId if received
-      if (data.threadId) {
-        setThreadId(data.threadId);
+      if (!response.body) {
+        throw new Error("Response body is null");
+      }
+
+      // Process the streaming response
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantMessage = "";
+      let receivedThreadId = threadId;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n').filter(line => line.trim());
+        
+        for (const line of lines) {
+          try {
+            const data = JSON.parse(line);
+            
+            // Handle different event types
+            switch (data.type) {
+              case 'threadId':
+                receivedThreadId = data.threadId;
+                setThreadId(data.threadId);
+                break;
+                
+              case 'message':
+                // Final message
+                assistantMessage = data.content;
+                setMessages((prevMessages) => 
+                  prevMessages.map(msg => 
+                    msg.id === placeholderId 
+                      ? { ...msg, content: data.content, isStreaming: false, sources: data.sources } 
+                      : msg
+                  )
+                );
+                break;
+                
+              case 'status':
+                // Update the placeholder with status info if needed
+                if (data.status === 'thinking') {
+                  setMessages((prevMessages) => 
+                    prevMessages.map(msg => 
+                      msg.id === placeholderId 
+                        ? { ...msg, content: "Thinking...", isStreaming: true } 
+                        : msg
+                    )
+                  );
+                }
+                break;
+                
+              case 'error':
+                // Handle error
+                setMessages((prevMessages) => 
+                  prevMessages.map(msg => 
+                    msg.id === placeholderId 
+                      ? { ...msg, content: data.message, isStreaming: false, isError: true } 
+                      : msg
+                  )
+                );
+                break;
+            }
+          } catch (e) {
+            console.error("Error parsing stream chunk:", e);
+          }
+        }
       }
       
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { role: "assistant", content: data.content, sources: data.sources },
-      ]);
+      // Update the threadId if received
+      if (receivedThreadId && receivedThreadId !== threadId) {
+        setThreadId(receivedThreadId);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       
       setMessages((prevMessages) => [
-        ...prevMessages,
+        ...prevMessages.filter(msg => !msg.isStreaming),
         {
           role: "assistant",
-          content: t("errorMessage") || "I'm sorry, I encountered an error while processing your request. Please try again.",
+          content: "I'm sorry, I encountered an error processing your request. Please try again later.",
         },
       ]);
     } finally {
       setIsLoading(false);
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
     }
   };
 

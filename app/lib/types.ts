@@ -5,6 +5,10 @@ export type LocaleType = "en" | "el";
 export interface Message {
   role: "user" | "assistant" | "system";
   content: string;
+  id?: string;
+  timestamp?: Date;
+  isStreaming?: boolean;
+  isError?: boolean;
   sources?: {
     url?: string;
     title?: string;

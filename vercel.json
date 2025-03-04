@@ -4,5 +4,11 @@
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
   "outputDirectory": ".next",
-  "regions": ["cdg1"]
+  "regions": ["cdg1"],
+  "functions": {
+    "app/api/chat/route.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
 } 
