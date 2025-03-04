@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { KnowledgeBase } from "@/app/lib/knowledge-base";
-import MistralClient from "@mistralai/mistralai";
+import OpenAI from 'openai';
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,10 +17,9 @@ export async function POST(req: NextRequest) {
     const pineconeApiKey = process.env.PINECONE_API_KEY;
     const pineconeIndex = process.env.PINECONE_INDEX;
     const openAIApiKey = process.env.OPENAI_API_KEY;
-    const mistralApiKey = process.env.MISTRAL_API_KEY;
 
     // Validate environment variables
-    if (!pineconeApiKey || !pineconeIndex || !mistralApiKey) {
+    if (!pineconeApiKey || !pineconeIndex || !openAIApiKey) {
       return NextResponse.json(
         { error: "Missing required environment variables" },
         { status: 500 }
@@ -32,7 +31,6 @@ export async function POST(req: NextRequest) {
       pineconeApiKey,
       pineconeIndex,
       openaiApiKey: openAIApiKey,
-      mistralApiKey,
       namespace: 'tzironis-kb-mistral',
     });
 
@@ -69,7 +67,9 @@ export async function POST(req: NextRequest) {
     });
 
     // Initialize AI client
-    const mistral = new MistralClient(mistralApiKey);
+    const openai = new OpenAI({
+      apiKey: openAIApiKey,
+    });
 
     // Prepare the prompt
     const systemPrompt = `You are a web search assistant for Tzironis. Answer the user's query based ONLY on the following information from the Tzironis knowledge base:
@@ -81,14 +81,14 @@ Provide a concise, helpful, and accurate answer. If the information does not com
 DO NOT make up or infer information that is not present in the provided context. If you don't know the answer, say so clearly and suggest that the user might want to try a different search query.`;
 
     // Call AI API to generate the answer
-    const response = await mistral.chat({
-      model: "mistral-large-latest",
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: query }
       ],
       temperature: 0.3,
-      maxTokens: 1000,
+      max_tokens: 1000,
     });
 
     // Extract the answer
@@ -98,10 +98,10 @@ DO NOT make up or infer information that is not present in the provided context.
       answer,
       sources,
     });
-  } catch (error: any) {
-    console.error("Error in web search API:", error);
+  } catch (error: unknown) {
+    console.error("Error in web search API:", error instanceof Error ? error.message : String(error));
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
     );
   }

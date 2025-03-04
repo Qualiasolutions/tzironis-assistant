@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/app/lib/LanguageContext";
 import ThemeToggle from "./navigation/ThemeToggle";
+import LanguageSwitcher from "./LanguageSwitcher";
 import ProfileMenu from "./navigation/ProfileMenu";
 import MobileMenu from "./navigation/MobileMenu";
 import NavLink from "./navigation/NavLink";
@@ -125,6 +126,7 @@ export default function NavBar() {
           {/* Right side buttons and controls */}
           <div className="flex items-center space-x-2">
             <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+            <LanguageSwitcher />
             
             {/* Profile/login section */}
             {session ? (

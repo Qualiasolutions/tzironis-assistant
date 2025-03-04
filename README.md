@@ -1,23 +1,97 @@
-# Qualia AI Assistant
+# Tzironis Business Suite
 
-A comprehensive AI assistant for Tzironis (tzironis.gr) that handles website knowledge base, invoice automation, and business lead generation.
+A unified AI-powered business assistant that integrates knowledge base, lead generation, and invoice automation capabilities.
 
 ## Features
 
-### Website Knowledge Base
-- Indexes and provides information from tzironis.gr
-- Creates a comprehensive knowledge graph of company information
-- Answers queries about products, services, pricing, and more
+- OpenAI Assistant integration with thread persistence
+- Knowledge base for business questions
+- Automated lead generation
+- Invoice automation through Union.gr
+- Web crawling for up-to-date information
 
-### Invoice Automation
-- Automates invoice creation on union.gr
-- Processes natural language commands for invoice generation
-- Maintains logs of created invoices
+## Environment Setup
 
-### Business Lead Generation
-- Scrapes relevant business directories and platforms
-- Extracts and filters contact information
-- Formats data in structured formats
+1. Copy `.env.local.example` to `.env.local` and fill in your API keys:
+   - `OPENAI_API_KEY` - Your OpenAI API key
+   - `OPENAI_ASSISTANT_ID` - Your OpenAI Assistant ID (created in the OpenAI platform)
+   - `PINECONE_API_KEY` - Your Pinecone API key for vector storage
+   - Other relevant credentials (Union.gr login, etc.)
+
+## Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Deployment Instructions
+
+### Deploying to Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect your GitHub repository to Vercel
+3. Add all environment variables from `.env.local` to Vercel's environment variables
+4. Deploy with the following settings:
+   - Build Command: `npm run build`
+   - Output Directory: `.next`
+   - Install Command: `npm install`
+
+Vercel offers the best integration with Next.js and handles serverless functions automatically.
+
+### Deploying to Netlify
+
+1. Push your code to GitHub
+2. Connect your GitHub repository to Netlify
+3. Add all environment variables from `.env.local` to Netlify's environment variables
+4. Deploy with the following settings:
+   - Build Command: `npm run build`
+   - Publish Directory: `.next`
+   - Functions Directory: `netlify/functions`
+
+Note: You'll need to set up Netlify Functions for the API routes.
+
+### Deploying to Render
+
+1. Push your code to GitHub
+2. Create a new Web Service in Render connected to your GitHub repository
+3. Add all environment variables from `.env.local`
+4. Set up the service with:
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm start`
+
+### Deploying to Railway
+
+1. Push your code to GitHub
+2. Create a new project in Railway from your GitHub repository
+3. Add all environment variables from `.env.local`
+4. The service will automatically detect the Next.js project and configure it
+
+## Recommendation
+
+**Vercel** is the recommended deployment platform for this project because:
+
+1. It's built specifically for Next.js applications
+2. It handles serverless API routes seamlessly
+3. It offers excellent performance and reliability
+4. Free tier is generous for most small-to-medium businesses
+5. Environment variables are simple to manage
+6. The deployment process is straightforward and reliable
+
+## After Deployment
+
+1. Update your `NEXTAUTH_URL` environment variable to match your production URL
+2. Set up proper authentication for production
+3. Create a recurring task to crawl your website and update the knowledge base
 
 ## Tech Stack
 
@@ -77,15 +151,6 @@ A comprehensive AI assistant for Tzironis (tzironis.gr) that handles website kno
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Deployment
-
-This project is configured for easy deployment on Vercel:
-
-1. Push your code to GitHub
-2. Import the project in Vercel
-3. Configure the environment variables
-4. Deploy
 
 ## Security & Data Handling
 

@@ -11,6 +11,8 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // Store the thread ID for conversation persistence
+  const [threadId, setThreadId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { t, language, changeLanguage } = useLanguage();
@@ -21,11 +23,24 @@ export default function ChatInterface() {
       role: "assistant",
       content: t("chatWelcomeMessage") || "Hello! I'm your Tzironis business assistant. How can I help you today?",
     }]);
+    
+    // Try to restore thread ID from localStorage
+    const savedThreadId = localStorage.getItem('assistantThreadId');
+    if (savedThreadId) {
+      setThreadId(savedThreadId);
+    }
   }, [language, t]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Save threadId to localStorage whenever it changes
+  useEffect(() => {
+    if (threadId) {
+      localStorage.setItem('assistantThreadId', threadId);
+    }
+  }, [threadId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,11 +57,66 @@ export default function ChatInterface() {
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInputValue("");
     
+    // Handle language switching client-side
+    if (handleLanguageChange(inputValue)) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          language,
+          threadId, // Send the current threadId if available
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Update the threadId if received
+      if (data.threadId) {
+        setThreadId(data.threadId);
+      }
+      
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: "assistant", content: data.content, sources: data.sources },
+      ]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          role: "assistant",
+          content: t("errorMessage") || "I'm sorry, I encountered an error while processing your request. Please try again.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  };
+
+  // Handle language switching directly in the component
+  const handleLanguageChange = (input: string): boolean => {
     // Check if the user is asking about Greek language
-    if (inputValue.toLowerCase().trim() === "greek?" || 
-        inputValue.toLowerCase().includes("switch to greek") || 
-        inputValue.toLowerCase().includes("ελληνικά") || 
-        inputValue.toLowerCase().includes("greek language")) {
+    if (input.toLowerCase().trim() === "greek?" || 
+        input.toLowerCase().includes("switch to greek") || 
+        input.toLowerCase().includes("ελληνικά") || 
+        input.toLowerCase().includes("greek language")) {
       
       // Change language to Greek
       if (language !== "el") {
@@ -67,14 +137,14 @@ export default function ChatInterface() {
           },
         ]);
       }
-      return;
+      return true;
     }
     
     // Check if the user is asking about English language
-    if (inputValue.toLowerCase().trim() === "english?" || 
-        inputValue.toLowerCase().includes("switch to english") || 
-        inputValue.toLowerCase().includes("αγγλικά") ||
-        inputValue.toLowerCase().includes("english language")) {
+    if (input.toLowerCase().trim() === "english?" || 
+        input.toLowerCase().includes("switch to english") || 
+        input.toLowerCase().includes("αγγλικά") ||
+        input.toLowerCase().includes("english language")) {
       
       // Change language to English
       if (language !== "en") {
@@ -95,85 +165,29 @@ export default function ChatInterface() {
           },
         ]);
       }
-      return;
+      return true;
     }
-
-    setIsLoading(true);
-
-    // Check if this is a web search query
-    const isWebSearch = /search for|find information|look up|αναζήτηση για|βρες πληροφορίες|ψάξε για/i.test(inputValue);
     
-    if (isWebSearch) {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { 
-          role: "assistant", 
-          content: t("searchingKnowledgeBase") || "Searching the knowledge base...",
-        },
-      ]);
-    }
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          language,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-
-      const data = await response.json();
+    // Check for "new conversation" command
+    if (input.toLowerCase().includes("new conversation") || 
+        input.toLowerCase().includes("start over") || 
+        input.toLowerCase().includes("reset chat") ||
+        input.toLowerCase().includes("νέα συζήτηση") || 
+        input.toLowerCase().includes("ξεκίνα από την αρχή")) {
       
-      // If this was a search query, replace the "searching..." message
-      if (isWebSearch) {
-        setMessages((prevMessages) => [
-          ...prevMessages.slice(0, prevMessages.length - 1),
-          { 
-            role: "assistant", 
-            content: data.content,
-            sources: data.sources 
-          },
-        ]);
-      } else {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { role: "assistant", content: data.content, sources: data.sources },
-        ]);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
+      // Clear thread ID and messages
+      setThreadId(null);
+      localStorage.removeItem('assistantThreadId');
       
-      // If this was a search query, replace the "searching..." message
-      if (isWebSearch) {
-        setMessages((prevMessages) => [
-          ...prevMessages.slice(0, prevMessages.length - 1),
-          {
-            role: "assistant",
-            content: t("errorMessage") || "I'm sorry, I encountered an error while processing your request. Please try again.",
-          },
-        ]);
-      } else {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            role: "assistant",
-            content: t("errorMessage") || "I'm sorry, I encountered an error while processing your request. Please try again.",
-          },
-        ]);
-      }
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
+      setMessages([{
+        role: "assistant",
+        content: t("newConversationMessage") || "I've started a new conversation. How can I help you today?",
+      }]);
+      
+      return true;
     }
+    
+    return false;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -191,19 +205,41 @@ export default function ChatInterface() {
     setInputValue(message);
   };
 
+  const startNewConversation = () => {
+    // Clear thread ID and messages
+    setThreadId(null);
+    localStorage.removeItem('assistantThreadId');
+    
+    setMessages([{
+      role: "assistant",
+      content: t("newConversationMessage") || "I've started a new conversation. How can I help you today?",
+    }]);
+  };
+
   return (
     <div className="flex flex-col h-full max-h-full w-full bg-white dark:bg-gray-900 relative">
       {/* Chat header */}
       <div className="border-b border-gray-200 dark:border-gray-800 py-3 px-4 bg-white dark:bg-gray-900">
-        <div className="flex items-center">
-          <Bot className="h-5 w-5 text-primary mr-2" />
-          <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Tzironis Assistant</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Bot className="h-5 w-5 text-primary mr-2" />
+            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Tzironis Assistant</h2>
+          </div>
+          
+          {/* Add New Conversation button */}
+          <button 
+            onClick={startNewConversation} 
+            className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary flex items-center"
+          >
+            <Sparkles className="h-4 w-4 mr-1" />
+            {t("newConversation") || "New Conversation"}
+          </button>
         </div>
       </div>
       
       {/* Chat messages container */}
-      <div className="flex-1 overflow-y-auto pb-32">
-        <div className="px-4 py-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="space-y-6">
           {messages.map((message, index) => (
             <MessageBubble key={index} message={message} />
           ))}
@@ -215,25 +251,26 @@ export default function ChatInterface() {
               </div>
             </div>
           )}
-          {messages.length === 0 && (
+          {messages.length === 1 && (
             <div className="bg-muted/40 rounded-lg p-4 mt-4">
-              <h3 className="font-medium text-lg mb-2 text-foreground">{t("chatWelcome")}</h3>
-              <p className="text-muted-foreground mb-3">{t("features")}</p>
-              <div className="grid gap-2">
+              <h3 className="font-medium text-lg mb-2 text-foreground">{t("chatWelcome") || "Welcome to Tzironis Assistant"}</h3>
+              <p className="text-muted-foreground mb-3">{t("features") || "You can ask me about:"}</p>
+              
+              <div className="space-y-2">
                 <button
-                  className="bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
-                  onClick={() => handlePredefinedMessage(t("invoiceAutomationQuery") || "How do I automate my invoicing?")}
+                  className="w-full bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
+                  onClick={() => handlePredefinedMessage(t("invoiceAutomationQuery") || "Create an invoice for ABC Company with VAT EL123456789 for consulting services")}
                 >
-                  {t("invoiceAutomationQuery") || "How do I automate my invoicing?"}
+                  {t("invoiceAutomationQuery") || "Create an invoice for ABC Company with VAT EL123456789 for consulting services"}
                 </button>
                 <button
-                  className="bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
-                  onClick={() => handlePredefinedMessage(t("leadGenerationQuery") || "How can I generate more business leads?")}
+                  className="w-full bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
+                  onClick={() => handlePredefinedMessage(t("leadGenerationQuery") || "Generate 5 leads from the technology industry")}
                 >
-                  {t("leadGenerationQuery") || "How can I generate more business leads?"}
+                  {t("leadGenerationQuery") || "Generate 5 leads from the technology industry"}
                 </button>
                 <button
-                  className="bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
+                  className="w-full bg-background text-foreground hover:bg-muted/60 p-2 rounded-md text-left text-sm transition-colors"
                   onClick={() => handlePredefinedMessage(t("productQuery") || "What school supplies do you offer?")}
                 >
                   {t("productQuery") || "What school supplies do you offer?"}
@@ -246,7 +283,7 @@ export default function ChatInterface() {
       </div>
 
       {/* Input area - fixed at bottom */}
-      <div className="border-t border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-gray-900 absolute bottom-0 left-0 right-0 shadow-lg">
+      <div className="border-t border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-gray-900">
         <div className="relative flex items-center">
           <textarea
             ref={inputRef}
@@ -275,13 +312,6 @@ export default function ChatInterface() {
           >
             <Send className="h-4 w-4" />
           </button>
-        </div>
-        
-        <div className="mt-2 flex justify-center">
-          <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-            <Sparkles className="h-3 w-3 mr-1 text-primary" />
-            {t("poweredBy") || "Powered by"} QUALIA
-          </span>
         </div>
       </div>
     </div>

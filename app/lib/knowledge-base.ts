@@ -6,7 +6,6 @@ import * as cheerio from "cheerio";
 import puppeteer from "puppeteer";
 import { v4 as uuidv4 } from "uuid";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MistralEmbeddings } from "./mistral-embeddings";
 import { Embeddings } from "@langchain/core/embeddings";
 import { parse as parseCSV } from 'csv-parse/sync'; // Import CSV parser
 
@@ -40,7 +39,6 @@ export class KnowledgeBase {
     pineconeApiKey,
     pineconeIndex,
     openaiApiKey,
-    mistralApiKey,
     namespace = "tzironis-kb-mistral",
     maxPages = 50,
     maxDepth = 3,
@@ -48,25 +46,20 @@ export class KnowledgeBase {
     pineconeApiKey: string;
     pineconeIndex: string;
     openaiApiKey?: string;
-    mistralApiKey?: string;
     namespace?: string;
     maxPages?: number;
     maxDepth?: number;
   }) {
     this.pineconeApiKey = pineconeApiKey;
     
-    // Use Mistral embeddings if available, otherwise fallback to OpenAI
-    if (mistralApiKey) {
-      this.embeddings = new MistralEmbeddings({
-        apiKey: mistralApiKey,
-      });
-    } else if (openaiApiKey) {
+    // Use OpenAI embeddings
+    if (openaiApiKey) {
       this.embeddings = new OpenAIEmbeddings({
         openAIApiKey: openaiApiKey,
         modelName: "text-embedding-3-small",
       });
     } else {
-      throw new Error("Either Mistral or OpenAI API key is required for embeddings");
+      throw new Error("OpenAI API key is required for embeddings");
     }
     
     this.namespace = namespace;

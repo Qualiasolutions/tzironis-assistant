@@ -4,14 +4,15 @@
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gz
 
 # testing
 /coverage
+/test-results
 
 # next.js
 /.next/
 /out/
+/.swc/
 
 # production
 /build
@@ -26,8 +27,11 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env.local
 .env
-.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -39,7 +43,11 @@ next-env.d.ts
 # IDE
 .idea
 .vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+
+# Log files
+/logs
+*.log
+
+# Cache files
+.cache/
+.turbo/
