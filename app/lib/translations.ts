@@ -28,6 +28,19 @@ export const translations = {
     mobileApp: "Mobile App",
     desktopApp: "Desktop App",
     
+    // Voice Controls
+    startListening: "Start listening",
+    stopListening: "Stop listening",
+    listening: "Listening...",
+    enableVoice: "Enable voice responses",
+    disableVoice: "Disable voice responses",
+    voiceEnabled: "Voice response enabled",
+    voiceSpeaking: "Speaking...",
+    copyCode: "Copy code",
+    sources: "Sources",
+    newConversationMessage: "I've started a new conversation. How can I help you today?",
+    newConversation: "New Conversation",
+    
     // Lead Generation
     leadGenTitle: "Lead Generation",
     leadGenSubtitle: "Generate and manage potential business leads",
@@ -117,7 +130,20 @@ export const translations = {
     navChat: "Συνομιλία",
     navKnowledgeBase: "Βάση Γνώσεων",
     navInvoiceAutomation: "Αυτοματισμός Τιμολογίων",
-    navLeadGeneration: "Δημιουργία Πελατών",
+    navLeadGeneration: "Εύρεση Πελατών",
+    
+    // Voice Controls
+    startListening: "Έναρξη ακρόασης",
+    stopListening: "Διακοπή ακρόασης",
+    listening: "Σας ακούω...",
+    enableVoice: "Ενεργοποίηση φωνητικών απαντήσεων",
+    disableVoice: "Απενεργοποίηση φωνητικών απαντήσεων",
+    voiceEnabled: "Φωνητική απόκριση ενεργή",
+    voiceSpeaking: "Μιλάω...",
+    copyCode: "Αντιγραφή κώδικα",
+    sources: "Πηγές",
+    newConversationMessage: "Ξεκίνησα μια νέα συνομιλία. Πώς μπορώ να σας βοηθήσω σήμερα;",
+    newConversation: "Νέα Συνομιλία",
     
     // Lead Generation
     leadGenTitle: "Δημιουργία Πελατών",

@@ -157,7 +157,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
                   <button
                     onClick={() => copyToClipboard(part.content)}
                     className="text-slate-300 hover:text-white transition"
-                    aria-label={t("copyCode") || "Copy code"}
+                    aria-label={t("copyCode")}
                   >
                     {copied ? (
                       <Check className="h-4 w-4 text-green-400" />
@@ -184,7 +184,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         {message.sources && message.sources.length > 0 && (
           <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
             <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
-              {t("sources") || "Sources"}:
+              {t("sources")}:
             </p>
             <ul className="mt-1 text-xs text-slate-600 dark:text-slate-300">
               {message.sources.map((source, index) => (

@@ -6,6 +6,7 @@ import MessageBubble from "./MessageBubble";
 import { Message } from "@/app/lib/types";
 import VoiceControls from "./VoiceControls";
 import { Send, Bot, Sparkles, Globe } from "lucide-react";
+import { speakTextInChunks, isSpeechSynthesisSupported } from "@/app/lib/speech";
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -16,6 +17,11 @@ export default function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { t, language, changeLanguage } = useLanguage();
+  
+  // Voice response state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [currentSpeechCanceller, setCurrentSpeechCanceller] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     // Set welcome message
@@ -29,7 +35,18 @@ export default function ChatInterface() {
     if (savedThreadId) {
       setThreadId(savedThreadId);
     }
+    
+    // Try to restore voice preference from localStorage
+    const savedVoicePreference = localStorage.getItem('voiceEnabled');
+    if (savedVoicePreference === 'true') {
+      setVoiceEnabled(true);
+    }
   }, [language, t]);
+
+  // Stop speaking when language changes
+  useEffect(() => {
+    stopSpeaking();
+  }, [language]);
 
   useEffect(() => {
     scrollToBottom();
@@ -41,10 +58,74 @@ export default function ChatInterface() {
       localStorage.setItem('assistantThreadId', threadId);
     }
   }, [threadId]);
+  
+  // Save voice preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('voiceEnabled', voiceEnabled.toString());
+  }, [voiceEnabled]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+  
+  // Function to toggle text-to-speech
+  const toggleSpeech = () => {
+    if (isSpeaking) {
+      stopSpeaking();
+    }
+    setVoiceEnabled(!voiceEnabled);
+  };
+  
+  // Function to stop any ongoing speech
+  const stopSpeaking = () => {
+    if (currentSpeechCanceller) {
+      currentSpeechCanceller();
+      setCurrentSpeechCanceller(null);
+    }
+    setIsSpeaking(false);
+  };
+  
+  // Function to speak the last assistant message
+  const speakLastMessage = async () => {
+    if (!voiceEnabled || !isSpeechSynthesisSupported()) return;
+    
+    // Find the last assistant message
+    const lastAssistantMsg = [...messages].reverse().find(m => m.role === "assistant" && !m.isStreaming);
+    if (!lastAssistantMsg) return;
+    
+    // Stop any ongoing speech
+    stopSpeaking();
+    
+    // Start speaking
+    setIsSpeaking(true);
+    
+    const canceller = await speakTextInChunks(
+      lastAssistantMsg.content,
+      language,
+      {
+        rate: 1.0,
+        onComplete: () => {
+          setIsSpeaking(false);
+          setCurrentSpeechCanceller(null);
+        }
+      }
+    );
+    
+    setCurrentSpeechCanceller(() => canceller);
+  };
+  
+  // Speak the assistant's message when a new one is added
+  useEffect(() => {
+    const assistantMessages = messages.filter(m => m.role === "assistant" && !m.isStreaming);
+    if (assistantMessages.length > 0 && voiceEnabled) {
+      const lastMsg = assistantMessages[assistantMessages.length - 1];
+      
+      // Don't speak if this is just the welcome message on initial load
+      if (messages.length > 1) {
+        speakLastMessage();
+      }
+    }
+  }, [messages, voiceEnabled]);
 
   const handleSendMessage = async () => {
     if (inputValue.trim() === "" || isLoading) return;
@@ -56,6 +137,9 @@ export default function ChatInterface() {
 
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInputValue("");
+    
+    // Stop any ongoing speech when user sends a message
+    stopSpeaking();
     
     // Handle language switching client-side
     if (handleLanguageChange(inputValue)) {
@@ -174,6 +258,9 @@ export default function ChatInterface() {
       ]);
     } finally {
       setIsLoading(false);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
@@ -248,7 +335,7 @@ export default function ChatInterface() {
       
       setMessages([{
         role: "assistant",
-        content: t("newConversationMessage") || "I've started a new conversation. How can I help you today?",
+        content: t("newConversationMessage"),
       }]);
       
       return true;
@@ -279,7 +366,7 @@ export default function ChatInterface() {
     
     setMessages([{
       role: "assistant",
-      content: t("newConversationMessage") || "I've started a new conversation. How can I help you today?",
+      content: t("newConversationMessage"),
     }]);
   };
 
@@ -299,7 +386,7 @@ export default function ChatInterface() {
             className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary flex items-center"
           >
             <Sparkles className="h-4 w-4 mr-1" />
-            {t("newConversation") || "New Conversation"}
+            {t("newConversation")}
           </button>
         </div>
       </div>
@@ -368,6 +455,8 @@ export default function ChatInterface() {
               onTextInput={handleTextInput} 
               disabled={isLoading} 
               className="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors"
+              isSpeaking={isSpeaking}
+              onToggleSpeech={toggleSpeech}
             />
           </div>
           
@@ -380,6 +469,14 @@ export default function ChatInterface() {
             <Send className="h-4 w-4" />
           </button>
         </div>
+        
+        {/* Voice/Speech status indicator */}
+        {voiceEnabled && (
+          <div className="mt-2 text-xs text-center text-gray-500 dark:text-gray-400 flex items-center justify-center">
+            <Bot className="h-3 w-3 mr-1" />
+            {isSpeaking ? t("voiceSpeaking") : t("voiceEnabled")}
+          </div>
+        )}
       </div>
     </div>
   );
