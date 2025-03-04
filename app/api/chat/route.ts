@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { streamChat } from "@/app/lib/ai/openai-assistant";
-import { createLogger } from "@/app/lib/monitoring/logger";
-import { captureException } from "@/app/lib/monitoring/sentry";
+import { createLogger } from "@/app/lib/monitoring/edge-logger";
+import { captureException } from "@/app/lib/monitoring/edge-sentry";
 
 const logger = createLogger('chat-api');
 
@@ -44,7 +44,9 @@ export async function POST(req: NextRequest) {
     // Return a streaming response
     return streamChat(threadId, userContent);
   } catch (error: unknown) {
-    logger.error("Error in chat API:", error instanceof Error ? error.message : String(error));
+    logger.error("Error in chat API", { 
+      error: error instanceof Error ? error.message : String(error)
+    });
     captureException(error instanceof Error ? error : new Error(String(error)));
     
     const fallbackResponse = {

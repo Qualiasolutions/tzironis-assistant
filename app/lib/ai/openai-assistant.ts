@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { captureException } from '../monitoring/sentry';
-import { createLogger } from '../monitoring/logger';
+import { captureException } from '../monitoring/edge-sentry';
+import { createLogger } from '../monitoring/edge-logger';
 
 const logger = createLogger('openai-assistant');
 
